@@ -347,8 +347,6 @@ identity_server:
   server_url: http://radar-kratos-public
   # -- The admin server URL for the IDP used for service-to-service requests. Only needs to be accessible from inside the cluster where the managementportal resides
   server_admin_url: http://radar-kratos-admin
-  # -- The publicly accessible login URL for the IDP; needed when deviating from http(s)://server_name/kratos-ui
-  login_url: '{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/kratos-ui'
   # -- The user activation flow type to use for Management Portal (e.g., recovery, verification)
   user_activation_flow_type: "verification"
   # -- The user activation method to use for Management Portal (e.g., link, code)

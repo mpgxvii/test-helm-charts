@@ -120,8 +120,6 @@ spec:
             value: {{ .Values.identity_server.admin_email }}
           - name: MANAGEMENTPORTAL_IDENTITY_SERVER_SERVER_URL
             value: {{ tpl .Values.identity_server.server_url . }}
-          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_LOGIN_URL
-            value: {{ tpl .Values.identity_server.login_url . }}
           - name: MANAGEMENTPORTAL_IDENTITY_SERVER_SERVER_ADMIN_URL
             value: {{ tpl .Values.identity_server.server_admin_url . }}
           - name: MANAGEMENTPORTAL_IDENTITY_SERVER_INTERNAL

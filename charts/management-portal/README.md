@@ -101,7 +101,6 @@ A Helm chart for RADAR-Base Management Portal to manage projects and participant
 | identity_server.internal | bool | `true` | Whether the IDP is the MP's internal IDP |
 | identity_server.server_url | string | `"http://radar-kratos-public"` | The publicly accessible server URL for the IDP; needed when deviating from http(s)://server_name/kratos |
 | identity_server.server_admin_url | string | `"http://radar-kratos-admin"` | The admin server URL for the IDP used for service-to-service requests. Only needs to be accessible from inside the cluster where the managementportal resides |
-| identity_server.login_url | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/kratos-ui"` | The publicly accessible login URL for the IDP; needed when deviating from http(s)://server_name/kratos-ui |
 | identity_server.user_activation_flow_type | string | `"verification"` | The user activation flow type to use for Management Portal (e.g., recovery, verification) |
 | identity_server.user_activation_method | string | `"link"` | The user activation method to use for Management Portal (e.g., link, code) |
 | identity_server.admin_email | string | `"admin@example.com"` | The admin email to link to the admin service account. This account should only be used to set up admin-users |
