@@ -5,6 +5,37 @@ entries:
       artifacthub.io/license: Apache-2.0
     apiVersion: v2
     appVersion: 2.1.13
+    created: "2025-12-18T07:09:26.224651769Z"
+    description: A Helm chart for RADAR-Base Management Portal to manage projects
+      and participants throughout RADAR-base.
+    digest: a6ec5eed9fe32d3293b0df6c8f941d60ebdd13e9b6dc4e960006ed10324e0775
+    home: https://radar-base.org
+    icon: http://radar-base.org/wp-content/uploads/2022/09/Logo_RADAR-Base-RGB.png
+    keywords:
+    - radar-base
+    - remote-trial
+    maintainers:
+    - email: yatharthranjan89@gmail.com
+      name: Yatharth Ranjan
+      url: https://www.kcl.ac.uk/people/yatharth-ranjan
+    - email: mpgxvii@gmail.com
+      name: Pauline Conde
+      url: https://www.kcl.ac.uk/people/pauline-conde
+    - email: pim@thehyve.nl
+      name: Pim van Nierop
+      url: https://www.thehyve.nl/experts/pim-van-nierop
+    name: management-portal
+    sources:
+    - https://github.com/RADAR-base/radar-helm-charts/tree/main/charts/management-portal
+    - https://github.com/RADAR-base/ManagementPortal
+    type: application
+    urls:
+    - https://github.com/mpgxvii/test-helm-charts/releases/download/management-portal-1.7.7/management-portal-1.7.7.tgz
+    version: 1.7.7
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.1.13
     created: "2025-12-18T07:04:19.821888528Z"
     description: A Helm chart for RADAR-Base Management Portal to manage projects
       and participants throughout RADAR-base.
@@ -218,4 +249,4 @@ entries:
     urls:
     - https://github.com/mpgxvii/test-helm-charts/releases/download/management-portal-1.7.0/management-portal-1.7.0.tgz
     version: 1.7.0
-generated: "2025-12-18T07:04:19.821910559Z"
+generated: "2025-12-18T07:09:26.224689931Z"
