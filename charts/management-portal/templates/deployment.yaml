@@ -71,10 +71,7 @@ spec:
                 name: {{ .Values.postgres.userSecret.name }}
                 key: {{ .Values.postgres.userSecret.key | default "username" }}
             {{- else }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $secretName }}
-                key: postgresql_user
+            value: {{ .Values.postgres.user }}
             {{- end }}
           - name: SPRING_DATASOURCE_PASSWORD
             {{- if .Values.postgres.passwordSecret.name }}
