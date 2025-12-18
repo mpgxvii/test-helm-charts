@@ -323,6 +323,8 @@ rest_sources_auth:
 github:
   # Github authentication token
   authToken: ""
+  # Github repository name
+  repository: "radar-self-enrolment-definitions"
 
 # Gateway url
 gatewayUrl: "http://radar-gateway:8080"

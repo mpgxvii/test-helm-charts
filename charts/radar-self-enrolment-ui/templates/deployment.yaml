@@ -50,13 +50,13 @@ spec:
           - name: HYDRA_PUBLIC_URL
             value: {{ .Values.hydra.internalUrl | quote }}
           - name: NEXT_PUBLIC_HYDRA_PUBLIC_URL
-            value: {{ .Values.hydra.browserUrl | quote }}
+            value: {{ tpl .Values.hydra.browserUrl . | quote }}
 
           # REST source authorizer
           - name: RSA_BACKEND_URL
             value: {{ .Values.rest_sources_auth.backendUrl | quote }}
           - name: RSA_FRONTEND_URL
-            value: {{ .Values.rest_sources_auth.frontendUrl | quote }}
+            value: {{ tpl .Values.rest_sources_auth.frontendUrl . | quote }}
 
           # Base path configuration
           - name: BASEPATH
@@ -78,11 +78,11 @@ spec:
 
           # Public redirect URIs
           - name: NEXT_PUBLIC_ARMT_REDIRECT_URI
-            value: {{ .Values.auth.armt.redirectUri | quote }}
+            value: {{ tpl .Values.auth.armt.redirectUri . | quote }}
           - name: NEXT_PUBLIC_PRMT_REDIRECT_URI
-            value: {{ .Values.auth.prmt.redirectUri | quote }}
+            value: {{ tpl .Values.auth.prmt.redirectUri . | quote }}
           - name: NEXT_PUBLIC_SEP_REDIRECT_URI
-            value: {{ .Values.auth.sep.redirectUri | quote }}
+            value: {{ tpl .Values.auth.sep.redirectUri . | quote }}
 
           # GitHub and backend configuration
           - name: GITHUB_AUTH_TOKEN
