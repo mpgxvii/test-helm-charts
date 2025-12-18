@@ -1,0 +1,25 @@
+{{- $root := . -}}
+{{- range $name, $svc := .Values.services }}
+{{- if and $svc.enabled ($svc.service | default dict) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" $name) | nindent 4 }}
+spec:
+  type: {{ default "ClusterIP" $svc.service.type }}
+  selector:
+    {{- include "platform-backend.selectorLabels" (dict "root" $root "serviceName" $name) | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ default 80 $svc.service.port }}
+      targetPort: {{ default 8080 $svc.service.targetPort }}
+      protocol: TCP
+{{- if $svc.service.additionalPorts }}
+    {{- toYaml $svc.service.additionalPorts | nindent 4 }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
+

@@ -1,0 +1,15 @@
+# Common Helm ignores
+.DS_Store
+# VCS
+.git/
+.gitignore
+# Editors
+.idea/
+.vscode/
+# Node/npm
+node_modules/
+# MacOS
+*.swp
+Thumbs.db
+*.orig
+

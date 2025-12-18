@@ -1,0 +1,87 @@
+{{- $root := . -}}
+
+{{- if and $root.Values.services.delegate-api.enabled $root.Values.services.delegate-api.config $root.Values.services.delegate-api.config.enabled (or $root.Values.services.delegate-api.config.values $root.Values.services.delegate-api.config.data) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "delegate-api") }}-config
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "delegate-api") | nindent 4 }}
+data:
+  {{- if $root.Values.services.delegate-api.config.values }}
+  config.yaml: |
+{{ toYaml $root.Values.services.delegate-api.config.values | nindent 4 }}
+  {{- else if $root.Values.services.delegate-api.config.data }}
+  {{- toYaml $root.Values.services.delegate-api.config.data | nindent 2 }}
+  {{- end }}
+---
+{{- end }}
+
+{{- if and $root.Values.services.user-service.enabled $root.Values.services.user-service.config $root.Values.services.user-service.config.enabled (or $root.Values.services.user-service.config.values $root.Values.services.user-service.config.data) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "user-service") }}-config
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "user-service") | nindent 4 }}
+data:
+  {{- if $root.Values.services.user-service.config.values }}
+  config.yaml: |
+{{ toYaml $root.Values.services.user-service.config.values | nindent 4 }}
+  {{- else if $root.Values.services.user-service.config.data }}
+  {{- toYaml $root.Values.services.user-service.config.data | nindent 2 }}
+  {{- end }}
+---
+{{- end }}
+
+{{- if and $root.Values.services.project-service.enabled $root.Values.services.project-service.config $root.Values.services.project-service.config.enabled (or $root.Values.services.project-service.config.values $root.Values.services.project-service.config.data) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "project-service") }}-config
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "project-service") | nindent 4 }}
+data:
+  {{- if $root.Values.services.project-service.config.values }}
+  config.yaml: |
+{{ toYaml $root.Values.services.project-service.config.values | nindent 4 }}
+  {{- else if $root.Values.services.project-service.config.data }}
+  {{- toYaml $root.Values.services.project-service.config.data | nindent 2 }}
+  {{- end }}
+---
+{{- end }}
+
+{{- if and $root.Values.services.data-service.enabled $root.Values.services.data-service.config $root.Values.services.data-service.config.enabled (or $root.Values.services.data-service.config.values $root.Values.services.data-service.config.data) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "data-service") }}-config
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "data-service") | nindent 4 }}
+data:
+  {{- if $root.Values.services.data-service.config.values }}
+  config.yaml: |
+{{ toYaml $root.Values.services.data-service.config.values | nindent 4 }}
+  {{- else if $root.Values.services.data-service.config.data }}
+  {{- toYaml $root.Values.services.data-service.config.data | nindent 2 }}
+  {{- end }}
+---
+{{- end }}
+
+{{- if and $root.Values.services.data-sources-service.enabled $root.Values.services.data-sources-service.config $root.Values.services.data-sources-service.config.enabled (or $root.Values.services.data-sources-service.config.values $root.Values.services.data-sources-service.config.data) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "data-sources-service") }}-config
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "data-sources-service") | nindent 4 }}
+data:
+  {{- if $root.Values.services.data-sources-service.config.values }}
+  config.yaml: |
+{{ toYaml $root.Values.services.data-sources-service.config.values | nindent 4 }}
+  {{- else if $root.Values.services.data-sources-service.config.data }}
+  {{- toYaml $root.Values.services.data-sources-service.config.data | nindent 2 }}
+  {{- end }}
+---
+{{- end }}
+

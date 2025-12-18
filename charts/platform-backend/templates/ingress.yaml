@@ -1,0 +1,40 @@
+{{- $root := . -}}
+{{- range $name, $svc := .Values.services }}
+{{- if and $svc.enabled $svc.ingress $svc.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" $name) | nindent 4 }}
+  {{- with $svc.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $svc.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if $svc.ingress.tls }}
+  tls:
+    {{- toYaml $svc.ingress.tls | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range $svc.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}
+                port:
+                  number: {{ default 80 $svc.service.port }}
+          {{- end }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}
+

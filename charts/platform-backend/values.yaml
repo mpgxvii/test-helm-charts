@@ -1,0 +1,296 @@
+# Global settings
+global:
+  nameOverride: ""
+  fullnameOverride: ""
+  replicaCount: 1
+
+  imagePullSecrets: []
+  podAnnotations: {}
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Per-service configuration
+services:
+  delegate-api:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/delegate-api
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    ports:
+      containerPort: 8080
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      enabled: true
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: true
+      className: ""
+      annotations: {}
+      hosts:
+        - host: delegate.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: true
+      mountPath: /config
+      values:
+        auth:
+          managementPortal:
+            url: http://management-portal:8080
+          resourceName: delegate-api
+          issuer: https://issuer.example
+          publicKeyUrls:
+            - ""
+        userService:
+          baseUrl: http://localhost:8081
+        participantService:
+          baseUrl: http://localhost:8082
+    extraVolumes: []
+    extraVolumeMounts: []
+
+  user-service:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/user-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    ports:
+      containerPort: 8080
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      enabled: true
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: true
+      mountPath: /config
+      values:
+        server:
+          baseUri: "http://0.0.0.0:8081/user-service"
+        kratos:
+          baseUrl: "http://kratos:4434"
+          timeoutSeconds: 5
+          maxRetries: 3
+          endpoints:
+            identities: "/admin/identities"
+            identity: "/admin/identities/{id}"
+        managementPortal:
+          baseUrl: "http://management-portal:8080"
+          timeoutSeconds: 5
+          maxRetries: 3
+        logging:
+          level: "INFO"
+          file: "logs/user-service.log"
+          pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    extraVolumes: []
+    extraVolumeMounts: []
+
+  project-service:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/project-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    ports:
+      containerPort: 8080
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      enabled: true
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: true
+      mountPath: /config
+      values:
+        radar:
+          baseUrl: "https://api.radar.example.com/v1"
+          timeout: 30000
+          maxRetries: 3
+          auth:
+            enabled: true
+            tokenHeader: "Authorization"
+            tokenPrefix: "Bearer"
+        server:
+          port: 8081
+          host: "0.0.0.0"
+          cors:
+            enabled: true
+            allowedOrigins: ["*"]
+            allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+            allowedHeaders: ["Authorization", "Content-Type"]
+        logging:
+          level: "INFO"
+          format: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+          appenders:
+            - type: "console"
+            - type: "file"
+              currentLogFilename: "logs/project-service.log"
+              archivedLogFilenamePattern: "logs/project-service-%d.log.gz"
+              archivedFileCount: 5
+    extraVolumes: []
+    extraVolumeMounts: []
+
+  data-service:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/data-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    ports:
+      containerPort: 8080
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      enabled: true
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: false
+      mountPath: /config
+      data: {}
+    extraVolumes: []
+    extraVolumeMounts: []
+
+  data-sources-service:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/data-sources-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    ports:
+      containerPort: 8080
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      enabled: true
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: false
+      mountPath: /config
+      data: {}
+    extraVolumes: []
+    extraVolumeMounts: []

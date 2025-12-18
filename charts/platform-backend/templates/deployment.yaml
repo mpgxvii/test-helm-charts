@@ -1,0 +1,113 @@
+{{- $root := . -}}
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}
+  labels:
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" $name) | nindent 4 }}
+spec:
+  replicas: {{ default (default 1 $root.Values.global.replicaCount) $svc.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "platform-backend.selectorLabels" (dict "root" $root "serviceName" $name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform-backend.selectorLabels" (dict "root" $root "serviceName" $name) | nindent 8 }}
+        app.kubernetes.io/component: {{ $name }}
+      {{- if or $root.Values.global.podAnnotations $svc.podAnnotations }}
+      annotations:
+        {{- with $root.Values.global.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $svc.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "platform-backend.serviceAccountName" $root }}
+      {{- with $root.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: "{{ $svc.image.repository }}:{{ default $root.Chart.AppVersion $svc.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" $svc.image.pullPolicy }}
+          {{- if $svc.command }}
+          command: {{- toYaml $svc.command | nindent 10 }}
+          {{- end }}
+          {{- if $svc.args }}
+          args: {{- toYaml $svc.args | nindent 10 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ default 8080 $svc.ports.containerPort }}
+              protocol: TCP
+          {{- with $svc.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $svc.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if $svc.probes | default dict | hasKey "enabled" | ternary $svc.probes.enabled true }}
+          livenessProbe:
+            httpGet:
+              path: {{ default "/health" $svc.probes.path }}
+              port: {{ default "http" $svc.probes.port }}
+            {{- with $svc.probes.liveness }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ default "/health" $svc.probes.path }}
+              port: {{ default "http" $svc.probes.port }}
+            {{- with $svc.probes.readiness }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- with $svc.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if or $svc.extraVolumeMounts (and $svc.config $svc.config.enabled) }}
+          volumeMounts:
+            {{- with $svc.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if and $svc.config $svc.config.enabled }}
+            - name: config
+              mountPath: {{ default "/config" $svc.config.mountPath }}
+            {{- end }}
+          {{- end }}
+      {{- with $root.Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.global.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or $svc.extraVolumes (and $svc.config $svc.config.enabled) }}
+      volumes:
+        {{- if and $svc.config $svc.config.enabled }}
+        - name: config
+          configMap:
+            name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}-config
+        {{- end }}
+        {{- with $svc.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}
+
