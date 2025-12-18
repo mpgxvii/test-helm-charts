@@ -2,7 +2,7 @@
 
 # radar-self-enrolment-ui
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
+![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for RADAR-base Self Enrolment UI
 
@@ -76,7 +76,7 @@ A Helm chart for RADAR-base Self Enrolment UI
 | podSecurityContext.runAsGroup | int | `10000` |  |
 | podSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
 | deployment.resources | object | `{}` |  |
-| deployment.extraEnv | list | `[{"name":"NEXT_PUBLIC_HYDRA_PUBLIC_URL","value":"http://localhost/hydra"}]` | Array of extra envs to be passed to the deployment. Kubernetes format is expected - name: FOO   value: BAR |
+| deployment.extraEnv | list | `[]` | Array of extra envs to be passed to the deployment. Kubernetes format is expected - name: FOO   value: BAR |
 | deployment.extraVolumes | list | `[]` | If you want to mount external volume For example, mount a secret containing Certificate root CA to verify database TLS connection. |
 | deployment.extraVolumeMounts | list | `[]` |  |
 | deployment.nodeSelector | object | `{}` | Node labels for pod assignment. |
@@ -110,19 +110,27 @@ A Helm chart for RADAR-base Self Enrolment UI
 | startupProbe.successThreshold | int | `1` | Success threshold for startupProbe |
 | startupProbe.failureThreshold | int | `30` | Failure threshold for startupProbe |
 | networkpolicy | object | check `values.yaml` | Network policy defines who can access this application and who this applications has access to |
-| kratosAdminUrl | string | `"http://radar-kratos-admin/admin"` | Set this to ORY Kratos's Admin URL |
-| kratosPublicUrl | string | `"http://radar-kratos-public"` | Set this to ORY Kratos's public URL |
-| kratosBrowserUrl | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/kratos"` | Set this to ORY Kratos's public URL accessible from the outside world. |
-| hydraAdminUrl | string | `"http://radar-hydra-admin:4445/admin"` | Set this to ORY Hydra's Admin URL |
-| hydraPublicUrl | string | `"http://radar-hydra-public:4444"` | Set this to ORY Hydra's public URL |
-| restSourceBackendUrl | string | `"http://radar-rest-sources-backend:8080/rest-sources/backend"` | Set this to the REST source backend service URL |
-| gatewayUrl | string | `"http://radar-gateway:8080"` | Set this to the RADAR Gateway service URL |
-| armtClientId | string | `"aRMT"` | Client ID for ARMT authentication |
-| armtClientSecret | string | `""` | Client secret for ARMT authentication |
-| sepClientId | string | `"SEP"` | Client ID for SEP authentication |
-| sepClientSecret | string | `""` | Client secret for SEP authentication |
-| githubAuthToken | string | `""` | GitHub authentication token for API access (leave empty if not used) |
-| basePath | string | `"kratos-ui"` | The basePath |
+| basePath | string | `"study"` | Base path for the application (used by BASEPATH and NEXT_PUBLIC_BASEPATH) |
+| auth.armt.clientId | string | `"aRMT"` | Client ID for ARMT authentication |
+| auth.armt.clientSecret | string | `""` | Client secret for ARMT authentication |
+| auth.armt.redirectUri | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/{{ .Values.basePath }}/connect/armt"` | Public redirect URI for ARMT client |
+| auth.prmt.clientId | string | `"pRMT"` | Client ID for PRMT authentication |
+| auth.prmt.clientSecret | string | `""` | Client secret for PRMT authentication |
+| auth.prmt.redirectUri | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/{{ .Values.basePath }}/connect/prmt"` | Public redirect URI for PRMT client |
+| auth.sep.clientId | string | `"SEP"` | Client ID for SEP authentication |
+| auth.sep.clientSecret | string | `""` | Client secret for SEP authentication |
+| auth.sep.redirectUri | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/{{ .Values.basePath }}/connect/sep"` | Public redirect URI for SEP client |
+| kratos.internalUrl | string | `"http://kratos-public:80"` | Internal ORY Kratos URL used by the UI |
+| kratos.adminUrl | string | `"http://kratos-admin/admin"` | ORY Kratos admin URL |
+| hydra.internalUrl | string | `"http://hydra-public:4444"` | Internal ORY Hydra public URL used by the UI |
+| hydra.adminUrl | string | `"http://hydra-admin:4445/admin"` | ORY Hydra admin URL |
+| hydra.browserUrl | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/hydra"` | Externally accessible ORY Hydra public URL (NEXT_PUBLIC_HYDRA_PUBLIC_URL) |
+| rest_sources_auth.backendUrl | string | `"http://radar-rest-sources-backend:8080/rest-sources/backend"` | Internal REST Sources Authorizer backend URL |
+| rest_sources_auth.frontendUrl | string | `"{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/rest-sources/authorizer/"` | Public REST Sources Authorizer frontend URL |
+| github.authToken | string | `""` | GitHub authentication token for API access (leave empty if not used) |
+| gatewayUrl | string | `"http://radar-gateway:8080"` | RADAR Gateway service URL |
+| studyDefinitionRepository | string | `"GITHUB"` | Study definition repository provider (`GITHUB` or `LOCAL`) |
+| managementportal_url | string | `"http://management-portal:8080/managementportal"` | Base URL of Management Portal used for configuration (MP_CONFIG_BASE_URL) |
 | test.busybox | object | `{"repository":"busybox","tag":1}` | use a busybox image from another repository |
 
 ----------------------------------------------
