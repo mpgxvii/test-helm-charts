@@ -1,0 +1,678 @@
+# Default values for management-portal.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of Management Portal replicas to deploy
+replicaCount: 1
+
+image:
+  # -- Image registry
+  registry: ghcr.io
+  # -- Image repository
+  repository: radar-base/managementportal/management-portal
+  # -- Image tag (immutable tags are recommended)
+  # Overrides the image tag whose default is the chart appVersion.
+  tag:
+  # -- Image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  digest: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Optionally specify an array of imagePullSecrets.
+  # Secrets must be manually created in the namespace.
+  # e.g:
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+  #
+  pullSecrets: []
+
+# -- String to partially override management-portal.fullname template with a string (will prepend the release name)
+nameOverride: ""
+# -- String to fully override management-portal.fullname template with a string
+fullnameOverride: ""
+
+# -- Configure management-portal pods' Security Context
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Configure management-portal containers' Security Context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  # -- Kubernetes Service type
+  type: ClusterIP
+  # -- Management Portal port
+  port: 8080
+
+# -- Reconfigure Ingress to not force TLS
+disable_tls: false
+# -- The protocol in advertised URIs (https, http)
+advertised_protocol: https
+
+ingress:
+  # -- Enable ingress controller resource
+  enabled: true
+  # -- Annotations that define default ingress class, certificate issuer
+  # @default -- check values.yaml
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+  # -- Path within the url structure
+  path: "/managementportal"
+  # -- Ingress Path type
+  pathType: ImplementationSpecific
+  # -- IngressClass that will be used to implement the Ingress (Kubernetes 1.18+)
+  ingressClassName: nginx
+  # -- Hosts to accept requests from
+  hosts:
+    - localhost
+  tls:
+    # -- TLS Secret Name
+    secretName: radar-base-tls
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+
+  # -- CPU/Memory resource limits
+  limits:
+    cpu: 2
+    memory: 1700Mi
+  # -- CPU/Memory resource requests
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+# -- Node labels for pod assignment
+nodeSelector: {}
+
+# -- Toleration labels for pod assignment
+tolerations: []
+
+# -- Affinity labels for pod assignment
+affinity: {}
+
+# -- Extra environment variables
+extraEnvVars: []
+#  - name: BEARER_AUTH
+#    value: true
+
+# -- Custom livenessProbe that overrides the default one
+customLivenessProbe: {}
+
+livenessProbe:
+  # -- Enable livenessProbe
+  enabled: true
+  # -- Initial delay seconds for livenessProbe
+  initialDelaySeconds: 5
+  # -- Period seconds for livenessProbe
+  periodSeconds: 30
+  # -- Timeout seconds for livenessProbe
+  timeoutSeconds: 5
+  # -- Success threshold for livenessProbe
+  successThreshold: 1
+  # -- Failure threshold for livenessProbe
+  failureThreshold: 3
+
+# -- Custom readinessProbe that overrides the default one
+customReadinessProbe: {}
+
+readinessProbe:
+  # -- Enable readinessProbe
+  enabled: true
+  # -- Initial delay seconds for readinessProbe
+  initialDelaySeconds: 5
+  # -- Period seconds for readinessProbe
+  periodSeconds: 30
+  # -- Timeout seconds for readinessProbe
+  timeoutSeconds: 5
+  # -- Success threshold for readinessProbe
+  successThreshold: 1
+  # -- Failure threshold for readinessProbe
+  failureThreshold: 3
+
+# -- Custom startupProbe that overrides the default one
+customStartupProbe: {}
+
+startupProbe:
+  # -- Enable startupProbe
+  enabled: true
+  # -- Initial delay seconds for startupProbe
+  initialDelaySeconds: 5
+  # -- Period seconds for startupProbe
+  periodSeconds: 10
+  # -- Timeout seconds for startupProbe
+  timeoutSeconds: 10
+  # -- Success threshold for startupProbe
+  successThreshold: 1
+  # -- Failure threshold for startupProbe
+  failureThreshold: 30
+
+# -- Network policy defines who can access this application and who this applications has access to
+# @default -- check `values.yaml`
+networkpolicy:
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: app-config
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-appserver
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-fitbit-connector
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-gateway
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-integration
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-push-endpoint
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-rest-sources-backend
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-upload-connect-backend
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: radar-upload-source-connector
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: '{{ .Values.catalogue_server }}'
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: '{{ .Values.postgres.host | default "radar-cloudnative-postgresql-cluster" | trunc 63 | trimSuffix "-" }}'
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: hydra
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: kratos
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+      - port: 53
+        protocol: UDP
+      - port: 53
+        protocol: TCP
+
+# -- base 64 encoded binary p12 keystore containing a ECDSA certificate with alias `radarbase-managementportal-ec` and a RSA certificate with alias `selfsigned`.
+keystore: ""
+# With helmfile, this can be set in a production.yaml.gotmpl
+# file by setting
+#   keystore: {{ readFile "keystore.p12" | b64enc | quote }}
+# or with SOPS
+#   keystore: {{ exec "sops" (list "-d" "keystore.p12") | b64enc | quote }}
+
+# The public keys used for JWT signing in radar-kratos
+public_jwks: ""
+# With helmfile, this can be set in a production.yaml.gotmpl
+# file by setting
+#  public_jwks: {{ readFile "../etc/management-portal/public-jwks.json" | b64enc | quote }}
+
+# Configuration of the Postgres database to store data from Management Portal
+postgres:
+  # -- host name of the postgres db
+  host:
+  # -- post of the postgres db
+  port:
+  # -- database name
+  database:
+  # -- Kubernetes secret containing the database JDBC Connection url
+  # (disables use of 'host', 'port' and 'database' values).
+  urlSecret:
+    name: radar-cloudnative-postgresql-managementportal
+    key: jdbc-uri
+  # -- database user
+  user:
+  # -- Kubernetes secret containing the database username
+  # (disables use of 'user' value).
+  userSecret:
+    name: radar-cloudnative-postgresql-managementportal
+    key: username
+  # -- password of the database user
+  password:
+  # -- Kubernetes secret containing the database password
+  # (disables use of 'password' value).
+  passwordSecret:
+    name: radar-cloudnative-postgresql-managementportal
+    key: password
+
+  # -- Additional JDBC connection parameters e.g. sslmode=verify-full.
+  # Ignored when using 'urlSecret'.
+  connection_parameters: ""
+  ssl:
+    # -- set to true if the connecting to postgres using SSL
+    enabled: false
+    # -- base64 encoded certificate needed to connect to the PostgreSQL
+    # With helmfile, this can be set in a production.yaml.gotmpl
+    # file by setting
+    #   keystore: {{ readFile "certificate.pem" | b64enc | quote }}
+    # or with SOPS
+    #   keystore: {{ exec "sops" (list "-d" "certificate.pem") | b64enc | quote }}
+    keystore: ""
+
+# -- domain name of the server
+server_name: localhost
+# -- Hostname of the catalogue-server
+catalogue_server: catalog-server
+
+# Settings pertaining to the identity provider (IDP)
+identity_server:
+  # -- Whether the IDP is the MP's internal IDP
+  internal: true
+
+  # Set the following values if the IDP is external to the cluster (i.e. Ory Kratos)
+
+  # -- The publicly accessible server URL for the IDP; needed when deviating from http(s)://server_name/kratos
+  server_url: http://radar-kratos-public
+  # -- The admin server URL for the IDP used for service-to-service requests. Only needs to be accessible from inside the cluster where the managementportal resides
+  server_admin_url: http://radar-kratos-admin
+  # -- The publicly accessible login URL for the IDP; needed when deviating from http(s)://server_name/kratos-ui
+  login_url: '{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/kratos-ui'
+  # -- The user activation flow type to use for Management Portal (e.g., recovery, verification)
+  user_activation_flow_type: "verification"
+  # -- The user activation method to use for Management Portal (e.g., link, code)
+  user_activation_method: "link"
+  # -- The admin email to link to the admin service account. This account should only be used to set up admin-users
+  admin_email: admin@example.com
+
+authserver:
+  # -- Whether the authserver is the MP's internal authserver
+  internal: true
+
+  # Set the following values if the authserver is external to the cluster (i.e. Ory Hydra)
+
+  # -- The publicly accessible server URL for the authserver; needed when deviating from http(s)://server_name/auth
+  server_url: http://radar-hydra-public:4444
+  # -- The admin server URL for the authserver used for service-to-service requests. Only needs to be accessible from inside the cluster where the managementportal resides
+  server_admin_url: http://radar-hydra-admin:4445
+  # -- The publicly accessible login URL for the authserver; needed when deviating from http(s)://server_name/auth/login
+  login_url: '{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/hydra'
+
+managementportal:
+  # -- set to true, if automatic source-type import from catalogue server should be enabled
+  catalogue_server_enable_auto_import: false
+  # -- Override with a publicly resolvable url of the privacy-policy url for your set-up. This can be overridden on a project basis as well.
+  common_privacy_policy_url: http://info.thehyve.nl/radar-cns-privacy-policy
+  # -- Keystore alias to sign JWT tokens from Management Portal
+  oauth_checking_key_aliases_0: radarbase-managementportal-ec
+  # -- Keystore alias to sign JWT tokens from Management Portal
+  oauth_checking_key_aliases_1: selfsigned
+  # -- Whether or not to require AAL2 level authentication (i.e. MFA)
+  oauth_require_aal2: true
+  # -- OAuth2 Client secret of the Management Portal frontend application
+  frontend_client_secret: xxx
+  # -- Admin password of the default admin user created by the system
+  common_admin_password: xxx
+   # -- The file where the OAuth2 client details are stored
+  oauth_clients_file: /secrets/oauth_client_details.csv
+  # -- Base URL managementportal calls from inside the application container
+  base_url: http://localhost/managementportal
+
+# Configurations of the SMTP server to send activation emails from Management Portal
+smtp:
+  # -- set to true, if SMTP server should be enabled. Required to be true for production setup
+  enabled: false
+  # -- Hostname of the SMTP server
+  host: smtp
+  # -- Port of the SMTP server
+  port: 25
+  # -- Username of the SMTP server
+  username: username
+  # -- Password of the SMTP server
+  password: secret
+  # -- Email address which should be used to send activation emails
+  from: noreply@example.com
+  # -- set to true,if ttls should be enabled
+  starttls: false
+  # -- set to true, if the account should be authenticated before sending emails
+  auth: true
+
+# -- OAuth2 Client configuration
+# @default -- check `values.yaml`
+oauth_clients:
+  pRMT:
+    enable: false
+    resource_ids:
+      - res_gateway
+      - res_ManagementPortal
+      - res_appconfig
+    client_secret: ""
+    scope:
+      - MEASUREMENT.CREATE
+      - PROJECT.READ
+      - ROLE.READ
+      - SOURCE.READ
+      - SOURCEDATA.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+      - USER.READ
+    authorized_grant_types:
+      - refresh_token
+      - authorization_code
+    access_token_validity: 43200
+    refresh_token_validity: 7948800
+    additional_information: '{"dynamic_registration": true}'
+
+  aRMT:
+    enable: false
+    resource_ids:
+      - res_gateway
+      - res_ManagementPortal
+      - res_appconfig
+      - res_AppServer
+      - res_DataDashboardAPI
+    client_secret: ""
+    scope:
+      - MEASUREMENT.READ
+      - MEASUREMENT.CREATE
+      - PROJECT.READ
+      - ROLE.READ
+      - SOURCE.READ
+      - SOURCEDATA.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+      - USER.READ
+    authorized_grant_types:
+      - refresh_token
+      - authorization_code
+    access_token_validity: 43200
+    refresh_token_validity: 7948800
+    additional_information: '{"dynamic_registration": true}'
+
+  THINC-IT:
+    enable: false
+    resource_ids:
+      - res_gateway
+      - res_ManagementPortal
+      - res_appconfig
+    client_secret: ""
+    scope:
+      - MEASUREMENT.CREATE
+      - PROJECT.READ
+      - ROLE.READ
+      - SOURCE.READ
+      - SOURCEDATA.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+      - USER.READ
+    authorized_grant_types:
+      - refresh_token
+      - authorization_code
+    access_token_validity: 43200
+    refresh_token_validity: 7948800
+    additional_information: '{"dynamic_registration": true}'
+
+  radar_redcap_integrator:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+    client_secret: ""
+    scope:
+      - PROJECT.READ
+      - SUBJECT.CREATE
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+
+  radar_upload_backend:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+    client_secret: ""
+    scope:
+      - PROJECT.READ
+      - SUBJECT.READ
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+    additional_information: '{"dynamic_registration": true}'
+
+  radar_upload_connect:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+      - res_upload
+    client_secret: ""
+    scope:
+      - MEASUREMENT.CREATE
+      - PROJECT.READ
+      - SOURCE.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+
+  radar_upload_frontend:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+      - res_upload
+    client_secret: ""
+    scope:
+      - MEASUREMENT.CREATE
+      - PROJECT.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+    authorized_grant_types:
+      - authorization_code
+    access_token_validity: 900
+    redirect_uri:
+      - /upload/login
+      - http://localhost:8080/upload/login
+
+  radar_rest_sources_auth_backend:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+      - res_upload
+    client_secret: ""
+    scope:
+      - PROJECT.READ
+      - SUBJECT.READ
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+
+  radar_rest_sources_authorizer:
+    enable: false
+    resource_ids:
+      - res_restAuthorizer
+    client_secret: ""
+    scope:
+      - PROJECT.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+      - SUBJECT.CREATE
+    authorized_grant_types:
+      - authorization_code
+    access_token_validity: 900
+    redirect_uri:
+      - /rest-sources/authorizer/login
+
+  radar_fitbit_connector:
+    enable: false
+    resource_ids:
+      - res_restAuthorizer
+    client_secret: ""
+    scope:
+      - SUBJECT.READ
+      - MEASUREMENT.CREATE
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+
+  radar_appconfig:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+      - res_appconfig
+    client_secret: ""
+    scope:
+      - MEASUREMENT.CREATE
+      - OAUTHCLIENTS.READ
+      - PROJECT.READ
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+
+  appconfig_frontend:
+    enable: false
+    resource_ids:
+      - res_appconfig
+    client_secret: ""
+    scope:
+      - MEASUREMENT.CREATE
+      - OAUTHCLIENTS.READ
+      - PROJECT.CREATE
+      - PROJECT.READ
+      - PROJECT.UPDATE
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+    authorized_grant_types:
+      - authorization_code
+      - refresh_token
+    access_token_validity: 900
+    refresh_token_validity: 78000
+    redirect_uri:
+      - /appconfig/login
+    autoapprove:
+      - MEASUREMENT.CREATE
+      - OAUTHCLIENTS.READ
+      - PROJECT.CREATE
+      - PROJECT.READ
+      - PROJECT.UPDATE
+      - SOURCETYPE.READ
+      - SUBJECT.READ
+      - SUBJECT.UPDATE
+
+  grafana_dashboard:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+    client_secret: ""
+    scope:
+      - USER.READ
+    authorized_grant_types:
+      - authorization_code
+      - refresh_token
+    access_token_validity: 900
+    refresh_token_validity: 78000
+    redirect_uri:
+      - '{{ .Values.advertised_protocol }}://dashboard.{{ .Values.server_name }}/login/generic_oauth'
+    autoapprove:
+      - USER.READ
+
+  radar_push_endpoint:
+    enable: false
+    resource_ids:
+      - res_restAuthorizer
+    client_secret: ""
+    scope:
+      - SOURCETYPE.READ
+      - SUBJECT.UPDATE
+      - MEASUREMENT.READ
+      - MEASUREMENT.CREATE
+      - PROJECT.READ
+      - SUBJECT.READ
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900
+
+  radar_data_dashboard_backend:
+    enable: false
+    resource_ids:
+      - res_ManagementPortal
+    client_secret: ""
+    scope:
+      - PROJECT.READ
+      - SUBJECT.READ
+      - MEASUREMENT.READ
+    authorized_grant_types:
+      - client_credentials
+    access_token_validity: 900

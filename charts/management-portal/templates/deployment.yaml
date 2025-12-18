@@ -1,0 +1,256 @@
+{{ $idpLoginUrl  := .Values.identity_server.login_url | default (printf "%s://%s/kratos-ui" .Values.advertised_protocol .Values.server_name) }}
+{{ $idpServerUrl := .Values.identity_server.server_url | default (printf "%s://%s/kratos"   .Values.advertised_protocol .Values.server_name) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "management-portal.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        checksum/secrets-config: {{ include (print $.Template.BasePath "/secrets-config.yaml") . | sha256sum }}
+        checksum/secrets-keystore: {{ include (print $.Template.BasePath "/secrets-keystore.yaml") . | sha256sum }}
+      labels:
+        app.kubernetes.io/name: {{ include "management-portal.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- include "management-portal.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: "app.kubernetes.io/name"
+                    operator: In
+                    values:
+                    - {{ template "management-portal.name" . }}
+                  - key: "app.kubernetes.io/instance"
+                    operator: In
+                    values:
+                    - {{ .Release.Name }}
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ template "management-portal.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- $secretName := include "management-portal.fullname" . }}
+          env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "prod,swagger"
+          - name: SPRING_DATASOURCE_URL
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.urlSecret.name | default $secretName }}
+                key: {{ .Values.postgres.urlSecret.key | default "databaseUrl" }}
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.userSecret.name | default $secretName }}
+                key: {{ .Values.postgres.userSecret.key | default "databaseUser" }}
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.passwordSecret.name | default $secretName }}
+                key: {{ .Values.postgres.passwordSecret.key | default "databasePassword" }}
+          - name: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
+            value: "15000"
+          - name: SPRING_DATASOURCE_HIKARI_VALIDATION_TIMEOUT
+            value: "15000"
+          - name: SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD
+            value: "30000"
+          - name: MANAGEMENTPORTAL_MAIL_FROM
+            value: {{ .Values.smtp.from }}
+          - name: MANAGEMENTPORTAL_COMMON_BASEURL
+            value: {{ printf "%s://%s" .Values.advertised_protocol .Values.server_name }}
+          - name: MANAGEMENTPORTAL_COMMON_MANAGEMENT_PORTAL_BASE_URL
+            value: {{ .Values.managementportal.base_url }}
+{{/* TODO for now secret with client_id and client_secret replaced with job creating clients with fixed client names*/}}
+{{/*          - name: MANAGEMENTPORTAL_FRONTEND_CLIENTID*/}}
+{{/*            valueFrom:*/}}
+{{/*              secretKeyRef:*/}}
+{{/*                name: managementportalapp-oauth-client*/}}
+{{/*                key: CLIENT_ID*/}}
+{{/*          - name: MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET*/}}
+{{/*            valueFrom:*/}}
+{{/*              secretKeyRef:*/}}
+{{/*                name: managementportalapp-oauth-client*/}}
+{{/*                key: CLIENT_SECRET*/}}
+          - name: MANAGEMENTPORTAL_FRONTEND_CLIENTID
+            value: "ManagementPortalapp"
+          - name: MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET
+            value: "{{ .Values.authserver.client_secret }}"
+          - name: MANAGEMENTPORTAL_CATALOGUE_SERVER_ENABLE_AUTO_IMPORT
+            value: "{{ .Values.managementportal.catalogue_server_enable_auto_import }}"
+          - name: MANAGEMENTPORTAL_OAUTH_CLIENTS_FILE
+            value: "{{ .Values.managementportal.oauth_clients_file }}"
+          - name: MANAGEMENTPORTAL_OAUTH_REQUIRE_AAL2
+            value: "{{ .Values.managementportal.oauth_require_aal2 }}"
+          - name: MANAGEMENTPORTAL_CATALOGUE_SERVER_SERVER_URL
+            value: http://{{ .Values.catalogue_server }}:9010/source-types
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_ADMIN_EMAIL
+            value: {{ .Values.identity_server.admin_email }}
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_SERVER_URL
+            value: {{ tpl .Values.identity_server.server_url . }}
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_LOGIN_URL
+            value: {{ tpl .Values.identity_server.login_url . }}
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_SERVER_ADMIN_URL
+            value: {{ tpl .Values.identity_server.server_admin_url . }}
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_INTERNAL
+            value: "false"
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_USER_ACTIVATION_FLOW_TYPE
+            value: {{ .Values.identity_server.user_activation_flow_type | quote }}
+          - name: MANAGEMENTPORTAL_IDENTITY_SERVER_USER_ACTIVATION_METHOD
+            value: {{ .Values.identity_server.user_activation_method | quote }}
+          - name: MANAGEMENTPORTAL_AUTHSERVER_SERVERURL
+            value:  {{ tpl .Values.authserver.server_url . }}
+          - name: MANAGEMENTPORTAL_AUTHSERVER_LOGINURL
+            value: {{ tpl .Values.authserver.login_url . }}
+          - name: MANAGEMENTPORTAL_AUTHSERVER_INTERNAL
+            value: "false"
+          - name: MANAGEMENTPORTAL_AUTHSERVER_SERVERADMINURL
+            value: {{ tpl .Values.authserver.server_admin_url . }}
+          - name: MANAGEMENTPORTAL_COMMON_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secretName }}
+                key: managementportal_common_admin_password
+          - name: MANAGEMENTPORTAL_COMMON_PRIVACY_POLICY_URL
+            value: {{ .Values.managementportal.common_privacy_policy_url }}
+          - name: SPRING_APPLICATION_JSON
+            value: '{"managementportal":{"oauth":{"checkingKeyAliases":["{{ .Values.managementportal.oauth_checking_key_aliases_0 }}","{{ .Values.managementportal.oauth_checking_key_aliases_1 }}"]}}}'
+          - name: JHIPSTER_SLEEP # gives time for the database to boot before the application
+            value: "0"
+          - name: JAVA_OPTS  # maximum heap size for the JVM running ManagementPortal, increase this as necessary
+            value: "-Xmx1500m"
+          {{- if .Values.smtp.enabled }}
+          - name: SPRING_MAIL_HOST
+            value: {{ .Values.smtp.host | quote }}
+          - name: SPRING_MAIL_PORT
+            value: {{ .Values.smtp.port | quote }}
+          {{- if .Values.smtp.auth }}
+          - name: SPRING_MAIL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secretName }}
+                key: smtpUsername
+          - name: SPRING_MAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secretName }}
+                key: smtpPassword
+          {{ end }}
+          - name: SPRING_MAIL_FROM
+            value: {{ .Values.smtp.from | quote }}
+          - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+            value: "{{ .Values.smtp.auth }}"
+          - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+            value: {{ .Values.smtp.starttls | quote }}
+          {{ end }}
+          {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          {{- if .Values.customLivenessProbe }}
+          livenessProbe: {{- .Values.customLivenessProbe | toYaml | nindent 12 }}
+          {{- else if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - /config/healthcheck.sh
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.customReadinessProbe }}
+          readinessProbe: {{- .Values.customReadinessProbe | toYaml | nindent 12 }}
+          {{- else if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - /config/healthcheck.sh
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.customStartupProbe }}
+          startupProbe: {{- .Values.customStartupProbe | toYaml | nindent 12 }}
+          {{- else if .Values.startupProbe.enabled }}
+          startupProbe:
+            exec:
+              command:
+              - /bin/sh
+              - /config/healthcheck.sh
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /config/
+            - name: secrets-config
+              mountPath: /secrets/
+              # Otherwise: Unable to read header from OAuth clients file: java.nio.file.NoSuchFileException: /mp-includes/config/oauth_client_details.csv
+            - name: keystore
+              mountPath: /mp-includes/config/
+            {{- if .Values.postgres.ssl.enabled }}
+            - name: postgres-root-cert
+              mountPath: /root/.postgresql/
+            {{ end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "management-portal.fullname" . }}
+        - name: secrets-config
+          secret:
+            secretName: {{ include "management-portal.fullname" . }}-config
+        - name: keystore
+          secret:
+            secretName: {{ include "management-portal.fullname" . }}-keystore
+        {{- if .Values.postgres.ssl.enabled }}
+        - name: postgres-root-cert
+          secret:
+            secretName: {{ include "management-portal.fullname" . }}-root-cert
+        {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

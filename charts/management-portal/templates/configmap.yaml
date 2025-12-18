@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  healthcheck.sh: |
+    #!/bin/sh
+    STATUS=$(curl -m 1 localhost:8080/managementportal/management/health)
+    if ! (echo "$STATUS" | grep -Fq 'db":{"status":"UP'); then
+      exit 1
+    fi
