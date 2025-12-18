@@ -25,9 +25,3 @@ maintainers:
   - email: pim@thehyve.nl
     name: Pim van Nierop
     url: https://www.thehyve.nl/experts/pim-van-nierop
-dependencies:
-- name: common
-  repository: https://radar-base.github.io/radar-helm-charts
-  tags:
-  - bitnami-common
-  version: 2.x.x

@@ -29,10 +29,6 @@ A Helm chart for RADAR-Base Management Portal to manage projects and participant
 
 ## Requirements
 
-| Repository | Name | Version |
-|------------|------|---------|
-| https://radar-base.github.io/radar-helm-charts | common | 2.x.x |
-
 ## Values
 
 | Key | Type | Default | Description |
