@@ -56,38 +56,32 @@ spec:
           - name: SPRING_PROFILES_ACTIVE
             value: "prod,swagger"
           - name: SPRING_DATASOURCE_URL
-{{- if .Values.postgres.urlSecret.name }}
             valueFrom:
               secretKeyRef:
+{{- if .Values.postgres.urlSecret.name }}
                 name: {{ .Values.postgres.urlSecret.name }}
                 key: {{ .Values.postgres.urlSecret.key | default "jdbc-uri" }}
 {{- else }}
-            valueFrom:
-              secretKeyRef:
                 name: {{ $secretName }}
                 key: postgres_url
 {{- end }}
           - name: SPRING_DATASOURCE_USERNAME
-{{- if .Values.postgres.userSecret.name }}
             valueFrom:
               secretKeyRef:
+{{- if .Values.postgres.userSecret.name }}
                 name: {{ .Values.postgres.userSecret.name }}
                 key: {{ .Values.postgres.userSecret.key | default "username" }}
 {{- else }}
-            valueFrom:
-              secretKeyRef:
                 name: {{ $secretName }}
                 key: postgresql_user
 {{- end }}
           - name: SPRING_DATASOURCE_PASSWORD
-{{- if .Values.postgres.passwordSecret.name }}
             valueFrom:
               secretKeyRef:
+{{- if .Values.postgres.passwordSecret.name }}
                 name: {{ .Values.postgres.passwordSecret.name }}
                 key: {{ .Values.postgres.passwordSecret.key | default "password" }}
 {{- else }}
-            valueFrom:
-              secretKeyRef:
                 name: {{ $secretName }}
                 key: postgresql_password
 {{- end }}
