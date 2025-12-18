@@ -56,41 +56,41 @@ spec:
           - name: SPRING_PROFILES_ACTIVE
             value: "prod,swagger"
           - name: SPRING_DATASOURCE_URL
-{{- if .Values.postgres.urlSecret.name }}
+            {{- if .Values.postgres.urlSecret.name }}
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.postgres.urlSecret.name }}
                 key: {{ .Values.postgres.urlSecret.key | default "jdbc-uri" }}
-{{- else }}
+            {{- else }}
             valueFrom:
               secretKeyRef:
                 name: {{ $secretName }}
                 key: postgres_url
-{{- end }}
+            {{- end }}
           - name: SPRING_DATASOURCE_USERNAME
-{{- if .Values.postgres.userSecret.name }}
+            {{- if .Values.postgres.userSecret.name }}
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.postgres.userSecret.name }}
                 key: {{ .Values.postgres.userSecret.key | default "username" }}
-{{- else }}
+            {{- else }}
             valueFrom:
               secretKeyRef:
                 name: {{ $secretName }}
                 key: postgresql_user
-{{- end }}
+            {{- end }}
           - name: SPRING_DATASOURCE_PASSWORD
-{{- if .Values.postgres.passwordSecret.name }}
+            {{- if .Values.postgres.passwordSecret.name }}
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.postgres.passwordSecret.name }}
                 key: {{ .Values.postgres.passwordSecret.key | default "password" }}
-{{- else }}
+            {{- else }}
             valueFrom:
               secretKeyRef:
                 name: {{ $secretName }}
                 key: postgresql_password
-{{- end }}
+            {{- end }}
           - name: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
             value: "15000"
           - name: SPRING_DATASOURCE_HIKARI_VALIDATION_TIMEOUT
@@ -102,7 +102,11 @@ spec:
           - name: MANAGEMENTPORTAL_COMMON_BASEURL
             value: {{ printf "%s://%s" .Values.advertised_protocol .Values.server_name }}
           - name: MANAGEMENTPORTAL_COMMON_MANAGEMENT_PORTAL_BASE_URL
+          {{- if .Values.managementportal.base_url }}
             value: {{ .Values.managementportal.base_url }}
+          {{- else }}
+            value: {{ printf "%s://%s/managementportal" .Values.advertised_protocol .Values.server_name }}
+          {{- end }}
           - name: MANAGEMENTPORTAL_FRONTEND_CLIENTID
             value: "ManagementPortalapp"
           - name: MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET
