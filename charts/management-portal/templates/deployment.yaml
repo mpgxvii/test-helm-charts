@@ -62,10 +62,7 @@ spec:
                 name: {{ .Values.postgres.urlSecret.name }}
                 key: {{ .Values.postgres.urlSecret.key | default "jdbc-uri" }}
             {{- else }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $secretName }}
-                key: postgres_url
+            value: "jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}{{ .Values.postgres.connection_parameters }}"
             {{- end }}
           - name: SPRING_DATASOURCE_USERNAME
             {{- if .Values.postgres.userSecret.name }}
