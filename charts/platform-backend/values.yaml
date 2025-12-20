@@ -24,7 +24,7 @@ services:
     image:
       repository: ghcr.io/healthradar/platform-backend/delegate-api
       tag: "dev"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     ports:
       containerPort: 8080
     service:
@@ -83,7 +83,7 @@ services:
     image:
       repository: ghcr.io/healthradar/platform-backend/user-service
       tag: "dev"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     ports:
       containerPort: 8080
     service:
@@ -144,7 +144,7 @@ services:
     image:
       repository: ghcr.io/healthradar/platform-backend/project-service
       tag: "dev"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     ports:
       containerPort: 8080
     service:
@@ -213,7 +213,7 @@ services:
     image:
       repository: ghcr.io/healthradar/platform-backend/data-service
       tag: "dev"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     ports:
       containerPort: 8080
     service:
@@ -257,7 +257,7 @@ services:
     image:
       repository: ghcr.io/healthradar/platform-backend/data-sources-service
       tag: "dev"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
     ports:
       containerPort: 8080
     service:
