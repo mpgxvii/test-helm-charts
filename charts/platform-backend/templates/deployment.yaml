@@ -45,7 +45,7 @@ spec:
           {{- toYaml $svc.args | nindent 10 }}
           {{- end }}
           {{- if and $svc.config $svc.config.enabled }}
-          - --args={{ default "/config" $svc.config.mountPath }}/config.yaml
+          - {{ default "/config.yaml" $svc.config.mountPath }}
           {{- end }}
           {{- end }}
           ports:
@@ -87,7 +87,8 @@ spec:
             {{- end }}
             {{- if and $svc.config $svc.config.enabled }}
             - name: config
-              mountPath: {{ default "/config" $svc.config.mountPath }}
+              mountPath: {{ default "/config.yaml" $svc.config.mountPath }}
+              subPath: config.yaml
             {{- end }}
           {{- end }}
       {{- with $root.Values.global.nodeSelector }}

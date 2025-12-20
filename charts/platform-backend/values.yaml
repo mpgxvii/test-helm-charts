@@ -61,7 +61,7 @@ services:
       targetCPUUtilizationPercentage: 80
     config:
       enabled: true
-      mountPath: /config
+      mountPath: /config.yaml
       values:
         auth:
           managementPortal:
@@ -116,7 +116,7 @@ services:
       targetCPUUtilizationPercentage: 80
     config:
       enabled: true
-      mountPath: /config
+      mountPath: /config.yaml
       values:
         server:
           baseUri: "http://0.0.0.0:8081/user-service"
@@ -177,7 +177,7 @@ services:
       targetCPUUtilizationPercentage: 80
     config:
       enabled: true
-      mountPath: /config
+      mountPath: /config.yaml
       values:
         radar:
           baseUrl: "https://api.radar.example.com/v1"
@@ -246,7 +246,7 @@ services:
       targetCPUUtilizationPercentage: 80
     config:
       enabled: false
-      mountPath: /config
+      mountPath: /config.yaml
       data: {}
     extraVolumes: []
     extraVolumeMounts: []
@@ -290,7 +290,7 @@ services:
       targetCPUUtilizationPercentage: 80
     config:
       enabled: false
-      mountPath: /config
+      mountPath: /config.yaml
       data: {}
     extraVolumes: []
     extraVolumeMounts: []
