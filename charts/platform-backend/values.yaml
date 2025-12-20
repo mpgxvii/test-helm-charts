@@ -198,12 +198,6 @@ services:
         logging:
           level: "INFO"
           format: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-          appenders:
-            - type: "console"
-            - type: "file"
-              currentLogFilename: "logs/project-service.log"
-              archivedLogFilenamePattern: "logs/project-service-%d.log.gz"
-              archivedFileCount: 5
     extraVolumes: []
     extraVolumeMounts: []
 
