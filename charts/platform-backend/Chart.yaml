@@ -2,7 +2,7 @@ apiVersion: v2
 name: platform-backend
 description: Helm chart for Onsentia platform backend (multi-service)
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "1.0.0"
 keywords:
   - onsentia
