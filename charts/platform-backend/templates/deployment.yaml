@@ -45,7 +45,7 @@ spec:
           {{- toYaml $svc.args | nindent 10 }}
           {{- end }}
           {{- if and $svc.config $svc.config.enabled }}
-          - --config={{ default "/config" $svc.config.mountPath }}/config.yaml
+          - --args={{ default "/config" $svc.config.mountPath }}/config.yaml
           {{- end }}
           {{- end }}
           ports:
