@@ -18,7 +18,7 @@ global:
 
 # Per-service configuration
 services:
-  delegate_api:
+  delegate-api:
     enabled: true
     replicaCount: 1
     image:
@@ -77,7 +77,7 @@ services:
     extraVolumes: []
     extraVolumeMounts: []
 
-  user_service:
+  user-service:
     enabled: true
     replicaCount: 1
     image:
@@ -138,7 +138,7 @@ services:
     extraVolumes: []
     extraVolumeMounts: []
 
-  project_service:
+  project-service:
     enabled: true
     replicaCount: 1
     image:
@@ -207,7 +207,7 @@ services:
     extraVolumes: []
     extraVolumeMounts: []
 
-  data_service:
+  data-service:
     enabled: true
     replicaCount: 1
     image:
@@ -251,7 +251,7 @@ services:
     extraVolumes: []
     extraVolumeMounts: []
 
-  data_sources_service:
+  data-sources-service:
     enabled: true
     replicaCount: 1
     image:

@@ -1,87 +1,19 @@
 {{- $root := . -}}
-
-{{- if and (hasKey $root.Values.services "delegate_api") $root.Values.services.delegate_api.enabled $root.Values.services.delegate_api.config (default true $root.Values.services.delegate_api.config.enabled) (or $root.Values.services.delegate_api.config.values $root.Values.services.delegate_api.config.data) }}
+{{- range $name, $svc := .Values.services }}
+{{- if and $svc.enabled $svc.config (default true $svc.config.enabled) (or $svc.config.values $svc.config.data) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "delegate_api") }}-config
+  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}-config
   labels:
-    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "delegate_api") | nindent 4 }}
+    {{- include "platform-backend.labels" (dict "root" $root "serviceName" $name) | nindent 4 }}
 data:
-  {{- if $root.Values.services.delegate_api.config.values }}
+  {{- if $svc.config.values }}
   config.yaml: |
-{{ toYaml $root.Values.services.delegate_api.config.values | nindent 4 }}
-  {{- else if $root.Values.services.delegate_api.config.data }}
-  {{- toYaml $root.Values.services.delegate_api.config.data | nindent 2 }}
+{{ toYaml $svc.config.values | nindent 4 }}
+  {{- else if $svc.config.data }}
+  {{- toYaml $svc.config.data | nindent 2 }}
   {{- end }}
 ---
 {{- end }}
-
-{{- if and (hasKey $root.Values.services "user_service") $root.Values.services.user_service.enabled $root.Values.services.user_service.config (default true $root.Values.services.user_service.config.enabled) (or $root.Values.services.user_service.config.values $root.Values.services.user_service.config.data) }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "user_service") }}-config
-  labels:
-    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "user_service") | nindent 4 }}
-data:
-  {{- if $root.Values.services.user_service.config.values }}
-  config.yaml: |
-{{ toYaml $root.Values.services.user_service.config.values | nindent 4 }}
-  {{- else if $root.Values.services.user_service.config.data }}
-  {{- toYaml $root.Values.services.user_service.config.data | nindent 2 }}
-  {{- end }}
----
 {{- end }}
-
-{{- if and (hasKey $root.Values.services "project_service") $root.Values.services.project_service.enabled $root.Values.services.project_service.config (default true $root.Values.services.project_service.config.enabled) (or $root.Values.services.project_service.config.values $root.Values.services.project_service.config.data) }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "project_service") }}-config
-  labels:
-    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "project_service") | nindent 4 }}
-data:
-  {{- if $root.Values.services.project_service.config.values }}
-  config.yaml: |
-{{ toYaml $root.Values.services.project_service.config.values | nindent 4 }}
-  {{- else if $root.Values.services.project_service.config.data }}
-  {{- toYaml $root.Values.services.project_service.config.data | nindent 2 }}
-  {{- end }}
----
-{{- end }}
-
-{{- if and (hasKey $root.Values.services "data_service") $root.Values.services.data_service.enabled $root.Values.services.data_service.config (default true $root.Values.services.data_service.config.enabled) (or $root.Values.services.data_service.config.values $root.Values.services.data_service.config.data) }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "data_service") }}-config
-  labels:
-    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "data_service") | nindent 4 }}
-data:
-  {{- if $root.Values.services.data_service.config.values }}
-  config.yaml: |
-{{ toYaml $root.Values.services.data_service.config.values | nindent 4 }}
-  {{- else if $root.Values.services.data_service.config.data }}
-  {{- toYaml $root.Values.services.data_service.config.data | nindent 2 }}
-  {{- end }}
----
-{{- end }}
-
-{{- if and (hasKey $root.Values.services "data_sources_service") $root.Values.services.data_sources_service.enabled $root.Values.services.data_sources_service.config (default true $root.Values.services.data_sources_service.config.enabled) (or $root.Values.services.data_sources_service.config.values $root.Values.services.data_sources_service.config.data) }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" "data_sources_service") }}-config
-  labels:
-    {{- include "platform-backend.labels" (dict "root" $root "serviceName" "data_sources_service") | nindent 4 }}
-data:
-  {{- if $root.Values.services.data_sources_service.config.values }}
-  config.yaml: |
-{{ toYaml $root.Values.services.data_sources_service.config.values | nindent 4 }}
-  {{- else if $root.Values.services.data_sources_service.config.data }}
-  {{- toYaml $root.Values.services.data_sources_service.config.data | nindent 2 }}
-  {{- end }}
----
-{{- end }}
-

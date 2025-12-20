@@ -6,11 +6,11 @@ kind: Service
 metadata:
   name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}
   labels:
-    {{- include "platform-backend.labels" (dict "root" $root "serviceName" $name) | nindent 4 }}
+      {{- include "platform-backend.labels" (dict "root" $root "serviceName" $name) | nindent 4 }}
 spec:
   type: {{ default "ClusterIP" $svc.service.type }}
   selector:
-    {{- include "platform-backend.selectorLabels" (dict "root" $root "serviceName" $name) | nindent 4 }}
+      {{- include "platform-backend.selectorLabels" (dict "root" $root "serviceName" $name) | nindent 4 }}
   ports:
     - name: http
       port: {{ default 80 $svc.service.port }}
