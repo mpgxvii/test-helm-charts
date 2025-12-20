@@ -469,6 +469,20 @@ entries:
   platform-backend:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-12-20T09:35:54.396819531Z"
+    description: Helm chart for Onsentia platform backend (multi-service)
+    digest: 66952e5bfb8b3b34a46c54cd292926cb6b987f9e7ddd548f8a2de09f39a8d63f
+    keywords:
+    - onsentia
+    - platform
+    - microservices
+    name: platform-backend
+    type: application
+    urls:
+    - https://github.com/mpgxvii/test-helm-charts/releases/download/platform-backend-0.1.4/platform-backend-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-12-20T09:20:18.161888168Z"
     description: Helm chart for Onsentia platform backend (multi-service)
     digest: 32720e63594542ecc43ffec33eb43ab5ddb54aca2f9c2443537eea2c5f429b96
@@ -602,4 +616,4 @@ entries:
     urls:
     - https://github.com/mpgxvii/test-helm-charts/releases/download/radar-self-enrolment-ui-0.4.0/radar-self-enrolment-ui-0.4.0.tgz
     version: 0.4.0
-generated: "2025-12-20T09:20:18.161939373Z"
+generated: "2025-12-20T09:35:54.396874774Z"
