@@ -66,14 +66,14 @@ services:
         auth:
           managementPortal:
             url: http://management-portal:8080
-          resourceName: delegate-api
+          resourceName: res_ManagementPortal
           issuer: https://issuer.example
           publicKeyUrls:
-            - ""
+            - "http://hydra-public:4444/hydra/.well-known/jwks.json"
         userService:
           baseUrl: http://localhost:8081/user-service
         participantService:
-          baseUrl: http://localhost:8081/participant-service
+          baseUrl: http://localhost:8081/user-service
         projectService:
           baseUrl: http://localhost:8082/project-service
         configService:
@@ -125,16 +125,21 @@ services:
       mountPath: /config.yaml
       values:
         server:
-          baseUri: "http://0.0.0.0:8081/user-service"
+          baseUri: "http://0.0.0.0:8081"
+        serviceAuth:
+          clientId: platform_backend
+          clientSecret: secret
+          tokenEndpoint: http://hydra-public:4444/hydra/oauth2/token
+          scope: SOURCEDATA.CREATE SOURCETYPE.UPDATE SOURCETYPE.DELETE AUTHORITY.UPDATE MEASUREMENT.DELETE PROJECT.READ AUDIT.CREATE USER.DELETE AUTHORITY.DELETE SUBJECT.DELETE MEASUREMENT.UPDATE SOURCEDATA.UPDATE SUBJECT.READ USER.UPDATE SOURCETYPE.CREATE AUTHORITY.READ USER.CREATE SOURCE.CREATE SOURCE.READ SUBJECT.CREATE ROLE.UPDATE ROLE.READ MEASUREMENT.READ PROJECT.UPDATE PROJECT.DELETE ROLE.DELETE SOURCE.DELETE SOURCETYPE.READ ROLE.CREATE SOURCEDATA.DELETE SUBJECT.UPDATE SOURCE.UPDATE PROJECT.CREATE AUDIT.READ MEASUREMENT.CREATE AUDIT.DELETE AUDIT.UPDATE AUTHORITY.CREATE USER.READ SOURCEDATA.READ
         kratos:
-          baseUrl: "http://kratos:4434"
+          baseUrl: "http://kratos-public:80"
           timeoutSeconds: 5
           maxRetries: 3
           endpoints:
-            identities: "/admin/identities"
-            identity: "/admin/identities/{id}"
+            identities: "/admin/kratos/identities"
+            identity: "/admin/kratos/identities/{id}"
         managementPortal:
-          baseUrl: "http://management-portal:8080"
+          baseUrl: "http://management-portal:8080/managementportal"
           timeoutSeconds: 5
           maxRetries: 3
         logging:
@@ -185,8 +190,13 @@ services:
       enabled: true
       mountPath: /config.yaml
       values:
+        serviceAuth:
+          clientId: platform_backend
+          clientSecret: secret
+          tokenEndpoint: http://hydra-public:4444/hydra/oauth2/token
+          scope: SOURCEDATA.CREATE SOURCETYPE.UPDATE SOURCETYPE.DELETE AUTHORITY.UPDATE MEASUREMENT.DELETE PROJECT.READ AUDIT.CREATE USER.DELETE AUTHORITY.DELETE SUBJECT.DELETE MEASUREMENT.UPDATE SOURCEDATA.UPDATE SUBJECT.READ USER.UPDATE SOURCETYPE.CREATE AUTHORITY.READ USER.CREATE SOURCE.CREATE SOURCE.READ SUBJECT.CREATE ROLE.UPDATE ROLE.READ MEASUREMENT.READ PROJECT.UPDATE PROJECT.DELETE ROLE.DELETE SOURCE.DELETE SOURCETYPE.READ ROLE.CREATE SOURCEDATA.DELETE SUBJECT.UPDATE SOURCE.UPDATE PROJECT.CREATE AUDIT.READ MEASUREMENT.CREATE AUDIT.DELETE AUDIT.UPDATE AUTHORITY.CREATE USER.READ SOURCEDATA.READ
         radar:
-          baseUrl: "https://api.radar.example.com/v1"
+          baseUrl: "http://management-portal:8080/managementportal/api"
           timeout: 30000
           maxRetries: 3
           auth:
@@ -194,7 +204,7 @@ services:
             tokenHeader: "Authorization"
             tokenPrefix: "Bearer"
         server:
-          port: 8081
+          port: 8082
           host: "0.0.0.0"
           cors:
             enabled: true
@@ -203,6 +213,7 @@ services:
             allowedHeaders: ["Authorization", "Content-Type"]
         logging:
           level: "INFO"
+          file: "logs/project-service.log"
           format: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     extraVolumes: []
     extraVolumeMounts: []
@@ -247,7 +258,12 @@ services:
     config:
       enabled: true
       mountPath: /config.yaml
-      data: {}
+      values:
+        serviceAuth:
+          clientId: data-service-client
+          clientSecret: your-client-secret-here
+          tokenEndpoint: http://hydra-public:4444/hydra/oauth2/token
+          scope: service-api
     extraVolumes: []
     extraVolumeMounts: []
 
@@ -294,11 +310,18 @@ services:
       values:
         server:
           baseUri: "http://0.0.0.0:8084"
+          isJmxEnabled: true
         logging:
           level: "INFO"
-          format: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+          file: "logs/data-sources-service.log"
+          pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+        serviceAuth:
+          clientId: platform_backend
+          clientSecret: secret
+          tokenEndpoint: http://hydra-public:4444/hydra/oauth2/token
+          scope: SOURCEDATA.CREATE SOURCETYPE.UPDATE SOURCETYPE.DELETE AUTHORITY.UPDATE MEASUREMENT.DELETE PROJECT.READ AUDIT.CREATE USER.DELETE AUTHORITY.DELETE SUBJECT.DELETE MEASUREMENT.UPDATE SOURCEDATA.UPDATE SUBJECT.READ USER.UPDATE SOURCETYPE.CREATE AUTHORITY.READ USER.CREATE SOURCE.CREATE SOURCE.READ SUBJECT.CREATE ROLE.UPDATE ROLE.READ MEASUREMENT.READ PROJECT.UPDATE PROJECT.DELETE ROLE.DELETE SOURCE.DELETE SOURCETYPE.READ ROLE.CREATE SOURCEDATA.DELETE SUBJECT.UPDATE SOURCE.UPDATE PROJECT.CREATE AUDIT.READ MEASUREMENT.CREATE AUDIT.DELETE AUDIT.UPDATE AUTHORITY.CREATE USER.READ SOURCEDATA.READ
         managementPortal:
-          baseUrl: "http://management-portal:8080"
+          baseUrl: "http://management-portal:8080/managementportal"
           timeoutSeconds: 5
           maxRetries: 3
         restSources:
@@ -307,3 +330,68 @@ services:
           maxRetries: 3
     extraVolumes: []
     extraVolumeMounts: []
+
+  config-service:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/config-service
+      tag: "dev"
+      pullPolicy: Always
+    ports:
+      containerPort: 8080
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      enabled: true
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: true
+      mountPath: /config.yaml
+      values:
+        server:
+          baseUri: "http://0.0.0.0:8083"
+        logging:
+          level: "INFO"
+          file: "logs/config-service.log"
+          pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+        providers:
+          github:
+            enabled: true
+            baseUrl: "https://raw.githubusercontent.com/Onsentia/study-definitions/main"
+            token: ""
+          appConfig:
+            enabled: false
+            basePath: "/etc/onsentia/study-config"
+          db:
+            enabled: false
+            jdbcUrl: ""
+            username: ""
+            password: ""
+          order: ["github", "appConfig", "db"]
+    extraVolumes: []
+    extraVolumeMounts: []
+
