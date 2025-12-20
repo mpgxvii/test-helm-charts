@@ -245,7 +245,7 @@ services:
       maxReplicas: 5
       targetCPUUtilizationPercentage: 80
     config:
-      enabled: false
+      enabled: true
       mountPath: /config.yaml
       data: {}
     extraVolumes: []
@@ -289,8 +289,21 @@ services:
       maxReplicas: 5
       targetCPUUtilizationPercentage: 80
     config:
-      enabled: false
+      enabled: true
       mountPath: /config.yaml
-      data: {}
+      values:
+        server:
+          baseUri: "http://0.0.0.0:8084"
+        logging:
+          level: "INFO"
+          format: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+        managementPortal:
+          baseUrl: "http://management-portal:8080"
+          timeoutSeconds: 5
+          maxRetries: 3
+        restSources:
+          baseUrl: "http://radar-rest-sources-backend:8080"
+          timeoutSeconds: 5
+          maxRetries: 3
     extraVolumes: []
     extraVolumeMounts: []
