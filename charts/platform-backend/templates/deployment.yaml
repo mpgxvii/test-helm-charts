@@ -39,8 +39,14 @@ spec:
           {{- if $svc.command }}
           command: {{- toYaml $svc.command | nindent 10 }}
           {{- end }}
+          {{- if or $svc.args (and $svc.config $svc.config.enabled) }}
+          args:
           {{- if $svc.args }}
-          args: {{- toYaml $svc.args | nindent 10 }}
+          {{- toYaml $svc.args | nindent 10 }}
+          {{- end }}
+          {{- if and $svc.config $svc.config.enabled }}
+          - --config={{ default "/config" $svc.config.mountPath }}/config.yaml
+          {{- end }}
           {{- end }}
           ports:
             - name: http
