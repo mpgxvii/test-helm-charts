@@ -132,7 +132,7 @@ readinessProbe:
 
 customStartupProbe: {}
 startupProbe:
-  enabled: true
+  enabled: false
   initialDelaySeconds: 5
   periodSeconds: 10
   timeoutSeconds: 10
