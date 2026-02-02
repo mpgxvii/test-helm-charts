@@ -184,10 +184,10 @@ api:
 
 # -- OAuth / Hydra (optional; set if using RADAR-base auth)
 auth:
-  authorizationUrl: ""
-  tokenUrl: ""
-  userinfoUrl: ""
-  revocationUrl: ""
+  authorizationUrl: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/hydra/oauth2/auth"
+  tokenUrl: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/hydra/oauth2/token"
+  userinfoUrl: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/hydra/userinfo"
+  revocationUrl: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/hydra/oauth2/revoke"
   endSessionUrl: ""
   cookiePrefix: "hr"
 
@@ -196,10 +196,7 @@ oauth:
   clientId: "platform_frontend"
   clientSecret: "secret"
   redirectUri: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/{{ .Values.basePath }}/api/auth/callback"
-  scopes: ""
-
-# -- Backend API base URL override (if different from managementPortalUrl)
-backendApiBaseUrl: "http://platform-backend-delegate-api:80"
+  scopes: "SOURCEDATA.CREATE SOURCETYPE.UPDATE SOURCETYPE.DELETE AUTHORITY.UPDATE MEASUREMENT.DELETE PROJECT.READ PROJECT.UPDATE AUDIT.CREATE USER.DELETE AUTHORITY.DELETE SUBJECT.DELETE"
 
 # -- Optional n8n webhooks (AI assistant, suggestions)
 n8n:
