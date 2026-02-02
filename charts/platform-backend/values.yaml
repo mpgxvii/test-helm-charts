@@ -1,7 +1,7 @@
 # Global settings
 global:
   nameOverride: ""
-  fullnameOverride: ""
+  fullnameOverride: "platform-backend"  # Override to shorten service names
   replicaCount: 1
 
   imagePullSecrets: []
@@ -72,15 +72,17 @@ services:
           publicKeyUrls:
             - "http://hydra-public:4444/hydra/.well-known/jwks.json"
         userService:
-          baseUrl: http://localhost:8081/user-service
+          baseUrl: http://platform-backend-user-service:80/user-service
         participantService:
-          baseUrl: http://localhost:8081/user-service
+          baseUrl: http://platform-backend-user-service:80/user-service
         projectService:
-          baseUrl: http://localhost:8082/project-service
+          baseUrl: http://platform-backend-project-service:80/project-service
         configService:
-          baseUrl: http://localhost:8083/config-service
+          baseUrl: http://platform-backend-config-service:80/config-service
         dataSourcesService:
-          baseUrl: http://localhost:8084/data-sources-service
+          baseUrl: http://platform-backend-data-sources-service:80/data-sources-service
+        dataService:
+          baseUrl: http://platform-backend-data-service:80/data-service
     extraVolumes: []
     extraVolumeMounts: []
 
@@ -92,11 +94,11 @@ services:
       tag: "dev"
       pullPolicy: Always
     ports:
-      containerPort: 8080
+      containerPort: 8081
     service:
       type: ClusterIP
       port: 80
-      targetPort: 8080
+      targetPort: 8081
     env: []
     envFrom: []
     resources: {}
@@ -157,11 +159,11 @@ services:
       tag: "dev"
       pullPolicy: Always
     ports:
-      containerPort: 8080
+      containerPort: 8082
     service:
       type: ClusterIP
       port: 80
-      targetPort: 8080
+      targetPort: 8082
     env: []
     envFrom: []
     resources: {}
@@ -225,11 +227,11 @@ services:
       tag: "dev"
       pullPolicy: Always
     ports:
-      containerPort: 8080
+      containerPort: 8085
     service:
       type: ClusterIP
       port: 80
-      targetPort: 8080
+      targetPort: 8085
     env: []
     envFrom: []
     resources: {}
@@ -273,11 +275,11 @@ services:
       tag: "dev"
       pullPolicy: Always
     ports:
-      containerPort: 8080
+      containerPort: 8084
     service:
       type: ClusterIP
       port: 80
-      targetPort: 8080
+      targetPort: 8084
     env: []
     envFrom: []
     resources: {}
@@ -336,11 +338,11 @@ services:
       tag: "dev"
       pullPolicy: Always
     ports:
-      containerPort: 8080
+      containerPort: 8083
     service:
       type: ClusterIP
       port: 80
-      targetPort: 8080
+      targetPort: 8083
     env: []
     envFrom: []
     resources: {}
