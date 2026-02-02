@@ -705,6 +705,32 @@ entries:
     urls:
     - https://github.com/mpgxvii/test-helm-charts/releases/download/platform-backend-0.1.0/platform-backend-0.1.0.tgz
     version: 0.1.0
+  platform-frontend:
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-02-02T17:36:47.206546745Z"
+    description: A Helm chart for RADAR-base Researcher Portal (platform-frontend)
+    digest: 8f8c9f0f96cfd986d9e30009de1de8387c033c62469f8a4356272fc6340a9143
+    home: https://radar-base.org
+    icon: http://radar-base.org/wp-content/uploads/2022/09/Logo_RADAR-Base-RGB.png
+    keywords:
+    - radar-base
+    - researcher-portal
+    - nextjs
+    maintainers:
+    - email: yatharth.ranjan@kcl.ac.uk
+      name: Yatharth Ranjan
+      url: https://www.kcl.ac.uk/people/yatharth-ranjan
+    - email: pauline.conde@kcl.ac.uk
+      name: Pauline Conde
+      url: https://www.kcl.ac.uk/people/pauline-conde
+    name: platform-frontend
+    type: application
+    urls:
+    - https://github.com/mpgxvii/test-helm-charts/releases/download/platform-frontend-0.0.1/platform-frontend-0.0.1.tgz
+    version: 0.0.1
   radar-self-enrolment-ui:
   - annotations:
       artifacthub.io/license: Apache-2.0
@@ -784,4 +810,4 @@ entries:
     urls:
     - https://github.com/mpgxvii/test-helm-charts/releases/download/radar-self-enrolment-ui-0.4.0/radar-self-enrolment-ui-0.4.0.tgz
     version: 0.4.0
-generated: "2026-02-02T15:07:35.381740155Z"
+generated: "2026-02-02T17:36:47.206624479Z"
