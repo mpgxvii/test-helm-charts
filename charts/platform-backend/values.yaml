@@ -81,8 +81,6 @@ services:
           baseUrl: http://platform-backend-config-service:80/config-service
         dataSourcesService:
           baseUrl: http://platform-backend-data-sources-service:80/data-sources-service
-        dataService:
-          baseUrl: http://platform-backend-data-service:80/data-service
     extraVolumes: []
     extraVolumeMounts: []
 
