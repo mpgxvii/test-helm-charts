@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform-frontend.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "platform-frontend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "platform-frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform-frontend.labels" . | nindent 8 }}
+        {{- with .Values.deployment.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with .Values.deployment.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "platform-frontend.imagePullSecrets" . | nindent 6 }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      {{- with .Values.deployment.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "platform-frontend.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          env:
+          # Public API URL (browser)
+          - name: NEXT_PUBLIC_API_URL
+            value: {{ tpl .Values.api.publicUrl . | quote }}
+          # Backend API base URL (server-side). Prefer backendApiBaseUrl, else api.backendBaseUrl, else api.publicUrl.
+          - name: BACKEND_API_BASE_URL
+            value: {{ tpl (default .Values.api.publicUrl (default .Values.api.backendBaseUrl .Values.backendApiBaseUrl)) . | quote }}
+          # OAuth / Auth (optional)
+          {{- if .Values.auth.authorizationUrl }}
+          - name: AUTH_AUTHORIZATION_URL
+            value: {{ tpl .Values.auth.authorizationUrl . | quote }}
+          {{- end }}
+          {{- if .Values.auth.tokenUrl }}
+          - name: AUTH_TOKEN_URL
+            value: {{ tpl .Values.auth.tokenUrl . | quote }}
+          {{- end }}
+          {{- if .Values.auth.userinfoUrl }}
+          - name: AUTH_USERINFO_URL
+            value: {{ tpl .Values.auth.userinfoUrl . | quote }}
+          {{- end }}
+          {{- if .Values.auth.revocationUrl }}
+          - name: AUTH_REVOCATION_URL
+            value: {{ tpl .Values.auth.revocationUrl . | quote }}
+          {{- end }}
+          {{- if .Values.auth.endSessionUrl }}
+          - name: AUTH_END_SESSION_URL
+            value: {{ tpl .Values.auth.endSessionUrl . | quote }}
+          {{- end }}
+          - name: AUTH_COOKIE_PREFIX
+            value: {{ .Values.auth.cookiePrefix | quote }}
+          - name: OAUTH_CLIENT_ID
+            value: {{ .Values.oauth.clientId | quote }}
+          - name: OAUTH_CLIENT_SECRET
+            value: {{ .Values.oauth.clientSecret | quote }}
+          - name: OAUTH_REDIRECT_URI
+            value: {{ tpl .Values.oauth.redirectUri . | quote }}
+          - name: OAUTH_SCOPES
+            value: {{ .Values.oauth.scopes | quote }}
+          # Base path
+          - name: BASEPATH
+            value: {{ .Values.basePath | quote }}
+          # Cookie / CSRF from secret
+          - name: COOKIE_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "platform-frontend.secretname" . }}
+                key: secretsCookie
+          - name: CSRF_COOKIE_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "platform-frontend.secretname" . }}
+                key: secretsCSRFCookie
+          - name: CSRF_COOKIE_NAME
+            value: {{ .Values.config.csrfCookieName | quote }}
+          # Optional n8n webhooks
+          {{- if .Values.n8n.webhookAiAssistantUrl }}
+          - name: NEXT_N8N_WEBHOOK_AI_ASSISTANT_URL
+            value: {{ tpl .Values.n8n.webhookAiAssistantUrl . | quote }}
+          {{- end }}
+          {{- if .Values.n8n.webhookSuggestionsUrl }}
+          - name: NEXT_N8N_WEBHOOK_SUGGESTIONS_URL
+            value: {{ tpl .Values.n8n.webhookSuggestionsUrl . | quote }}
+          {{- end }}
+          # Optional OpenRouter (set openrouter.apiKey in values or use deployment.extraEnv with a secret)
+          {{- if .Values.openrouter.apiKey }}
+          - name: OPENROUTER_API_KEY
+            value: {{ .Values.openrouter.apiKey | quote }}
+          {{- end }}
+          {{- if .Values.openrouter.model }}
+          - name: OPENROUTER_MODEL
+            value: {{ .Values.openrouter.model | quote }}
+          {{- end }}
+          {{- if .Values.deployment.extraEnv }}
+          {{- toYaml .Values.deployment.extraEnv | nindent 10 }}
+          {{- end }}
+          {{- with .Values.deployment.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          {{- if .Values.customLivenessProbe }}
+          livenessProbe: {{- .Values.customLivenessProbe | toYaml | nindent 12 }}
+          {{- else if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /{{ .Values.basePath }}/api/health
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.customReadinessProbe }}
+          readinessProbe: {{- .Values.customReadinessProbe | toYaml | nindent 12 }}
+          {{- else if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /{{ .Values.basePath }}/api/health
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.customStartupProbe }}
+          startupProbe: {{- .Values.customStartupProbe | toYaml | nindent 12 }}
+          {{- else if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /{{ .Values.basePath }}/api/health
+              port: http
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+          {{- if .Values.securityContext }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}

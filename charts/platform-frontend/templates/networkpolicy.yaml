@@ -1,0 +1,15 @@
+{{- if .Values.networkpolicy -}}
+{{- $npYaml := toYaml .Values.networkpolicy | replace "RELEASE_NAMESPACE" .Release.Namespace }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "platform-frontend.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "platform-frontend.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "platform-frontend.selectorLabels" . | nindent 6 }}
+  {{- $npYaml | nindent 2 }}
+{{- end }}

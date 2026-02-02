@@ -1,0 +1,217 @@
+# Default values for platform-frontend (RADAR-base Researcher Portal).
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Hostname for the Researcher Portal service
+server_name: localhost
+
+# -- Number of replicas in deployment
+replicaCount: 1
+# -- Number of revisions kept in history
+revisionHistoryLimit: 5
+
+image:
+  # -- Image registry
+  registry: ghcr.io
+  # -- Image repository
+  repository: healthradar/platform-frontend
+  # -- Image tag (immutable tags are recommended). Defaults to chart appVersion.
+  tag: "dev"
+  # -- Image digest (sha256:...). If set, overrides tag.
+  digest: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image pull secrets (must exist in namespace)
+  pullSecrets: []
+
+# -- String to partially override platform-frontend.fullname (prepends release name)
+nameOverride: ""
+# -- String to fully override platform-frontend.fullname
+fullnameOverride: "platform-frontend"
+
+## -- Application config
+config:
+  csrfCookieName: "platform_csrf"
+  secrets: {}
+
+## -- Service configuration
+service:
+  type: ClusterIP
+  loadBalancerIP: ""
+  nodePort: ""
+  port: 80
+  name: http
+
+## -- Secret configuration
+secret:
+  enabled: true
+  nameOverride: ""
+  secretAnnotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-install, pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/resource-policy: keep
+  hashSumEnabled: true
+
+# -- Reconfigure Ingress to not force TLS
+disable_tls: false
+# -- The protocol in URIs (https, http)
+advertised_protocol: https
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  # -- Base path for the app (e.g. /platform -> app at https://host/platform)
+  path: "/platform(/|$)(.*)"
+  pathType: ImplementationSpecific
+  ingressClassName: nginx
+  hosts:
+    - '{{ .Values.server_name }}'
+  tls:
+    secretName: radar-base-tls
+
+## -- Container level security context
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 10000
+  runAsGroup: 10000
+  allowPrivilegeEscalation: false
+  privileged: false
+  seccompProfile:
+    type: RuntimeDefault
+
+## -- Pod level security context
+podSecurityContext:
+  fsGroupChangePolicy: OnRootMismatch
+  runAsNonRoot: true
+  runAsUser: 10000
+  fsGroup: 10000
+  runAsGroup: 10000
+  seccompProfile:
+    type: RuntimeDefault
+
+## -- Deployment configuration
+deployment:
+  resources: {}
+  extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  dnsConfig: {}
+  labels: {}
+  annotations: {}
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 60
+
+affinity: {}
+
+customLivenessProbe: {}
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+customReadinessProbe: {}
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 30
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+customStartupProbe: {}
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 30
+
+# -- Network policy (set to {} to disable)
+networkpolicy:
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: "RELEASE_NAMESPACE"
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: ingress-nginx
+  egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: "RELEASE_NAMESPACE"
+      ports:
+        - port: 80
+          protocol: TCP
+        - port: 443
+          protocol: TCP
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+# -- Base path for the application (used in routes and NEXT_PUBLIC_API_URL)
+basePath: "platform"
+
+api:
+  # -- Backend API base URL (server-side). Leave empty to use publicUrl.
+  backendBaseUrl: "http://platform-backend-delegate-api:80"
+
+# -- OAuth / Hydra (optional; set if using RADAR-base auth)
+auth:
+  authorizationUrl: ""
+  tokenUrl: ""
+  userinfoUrl: ""
+  revocationUrl: ""
+  endSessionUrl: ""
+  cookiePrefix: "hr"
+
+# -- OAuth client (optional)
+oauth:
+  clientId: "platform_frontend"
+  clientSecret: "secret"
+  redirectUri: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/{{ .Values.basePath }}/api/auth/callback"
+  scopes: ""
+
+# -- Backend API base URL override (if different from managementPortalUrl)
+backendApiBaseUrl: "http://platform-backend-delegate-api:80"
+
+# -- Optional n8n webhooks (AI assistant, suggestions)
+n8n:
+  webhookAiAssistantUrl: ""
+  webhookSuggestionsUrl: ""
+
+# -- Optional OpenRouter (AI)
+openrouter:
+  apiKey: ""
+  model: ""
+
+test:
+  busybox:
+    repository: busybox
+    tag: "1"

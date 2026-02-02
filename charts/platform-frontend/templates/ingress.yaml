@@ -1,0 +1,47 @@
+{{- if .Values.ingress.enabled -}}
+{{- $path := .Values.ingress.path -}}
+{{- $hosts := .Values.ingress.hosts -}}
+{{- $pathType := .Values.ingress.pathType -}}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ include "platform-frontend.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "platform-frontend.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- if and .Values.ingress.tls (not .Values.disable_tls) }}
+  tls:
+    - hosts:
+        {{- range $hosts }}
+        - {{ tpl . $ | quote }}
+        {{- end }}
+      secretName: {{ .Values.ingress.tls.secretName | quote }}
+  {{- end }}
+  rules:
+  {{- range $hosts }}
+  - host: {{ tpl . $ | quote }}
+    http:
+      paths:
+        - path: {{ $path | quote }}
+          {{- if and $pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+          pathType: {{ $pathType }}
+          {{- end }}
+          backend:
+            service:
+              name: {{ include "platform-frontend.fullname" $ }}
+              port:
+                name: {{ $.Values.service.name | quote }}
+  {{- end }}
+{{- end }}
