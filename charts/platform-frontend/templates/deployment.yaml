@@ -35,9 +35,6 @@ spec:
           image: {{ include "platform-frontend.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           env:
-          # Public API URL (browser)
-          - name: NEXT_PUBLIC_API_URL
-            value: {{ tpl .Values.api.publicUrl . | quote }}
           # Backend API base URL (server-side). Prefer backendApiBaseUrl, else api.backendBaseUrl, else api.publicUrl.
           - name: BACKEND_API_BASE_URL
             value: {{ tpl (default .Values.api.publicUrl (default .Values.api.backendBaseUrl .Values.backendApiBaseUrl)) . | quote }}
