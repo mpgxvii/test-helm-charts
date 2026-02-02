@@ -37,7 +37,6 @@ services:
     envFrom: []
     resources: {}
     probes:
-      enabled: true
       path: /health
       port: http
       liveness:
@@ -102,7 +101,6 @@ services:
     envFrom: []
     resources: {}
     probes:
-      enabled: true
       path: /health
       port: http
       liveness:
@@ -168,7 +166,6 @@ services:
     envFrom: []
     resources: {}
     probes:
-      enabled: true
       path: /health
       port: http
       liveness:
@@ -237,7 +234,6 @@ services:
     envFrom: []
     resources: {}
     probes:
-      enabled: true
       path: /health
       port: http
       liveness:
@@ -286,7 +282,6 @@ services:
     envFrom: []
     resources: {}
     probes:
-      enabled: true
       path: /health
       port: http
       liveness:
@@ -350,7 +345,6 @@ services:
     envFrom: []
     resources: {}
     probes:
-      enabled: true
       path: /health
       port: http
       liveness:
