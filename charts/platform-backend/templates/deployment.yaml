@@ -60,7 +60,8 @@ spec:
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or (not $svc.probes) (default true $svc.probes.enabled) }}
+          {{- $probesEnabled := coalesce (index $svc.probes "enabled") (index $root.Values.global.probes "enabled") true }}
+          {{- if or (not $svc.probes) $probesEnabled }}
           livenessProbe:
             httpGet:
               path: {{ default "/health" $svc.probes.path }}
