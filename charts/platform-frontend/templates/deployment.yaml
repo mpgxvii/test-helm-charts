@@ -38,6 +38,8 @@ spec:
           # Backend API base URL (server-side). Prefer backendApiBaseUrl, else api.backendBaseUrl, else api.publicUrl.
           - name: BACKEND_API_BASE_URL
             value: {{ .Values.api.backendBaseUrl | quote }}
+          - name: FRONTEND_BASE_URL
+            value: {{ .Values.advertised_protocol }}://{{ .Values.server_name }}/{{ .Values.basePath }}
           # OAuth / Auth (optional)
           {{- if .Values.auth.authorizationUrl }}
           - name: AUTH_AUTHORIZATION_URL
