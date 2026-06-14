@@ -836,6 +836,40 @@ entries:
       artifacthub.io/license: Apache-2.0
     apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-06-14T10:57:07.708586466Z"
+    dependencies:
+    - name: common
+      repository: https://radar-base.github.io/radar-helm-charts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: 'A Helm chart for RADAR-base radar-mapper. Reads CDISC ODM XML files
+      produced by radar-output-restructure, enriches subject identifiers and REDCap
+      event names via Management Portal and CSV lookup tables, and writes enriched
+      ODM XML ready for REDCap import. Runs as a Kubernetes CronJob. '
+    digest: 97705e72a8f90fcb3f5f526eecded50c86dc1af3d87225cfd2882a6d5ce85a5f
+    home: https://radar-base.org
+    icon: http://radar-base.org/wp-content/uploads/2022/09/Logo_RADAR-Base-RGB.png
+    keywords:
+    - radar-base
+    - remote-trial
+    - redcap
+    - odm
+    maintainers:
+    - email: mpgxvii@gmail.com
+      name: Pauline Conde
+    name: radar-mapper
+    sources:
+    - https://github.com/RADAR-base/radar-helm-charts/tree/main/charts/radar-mapper
+    - https://github.com/RADAR-base/radar-mapper
+    type: application
+    urls:
+    - https://github.com/mpgxvii/test-helm-charts/releases/download/radar-mapper-0.1.3/radar-mapper-0.1.3.tgz
+    version: 0.1.3
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-06-14T08:32:33.750115959Z"
     dependencies:
     - name: common
@@ -1010,4 +1044,4 @@ entries:
     urls:
     - https://github.com/mpgxvii/test-helm-charts/releases/download/radar-self-enrolment-ui-0.4.0/radar-self-enrolment-ui-0.4.0.tgz
     version: 0.4.0
-generated: "2026-06-14T08:32:33.750212201Z"
+generated: "2026-06-14T10:57:07.7087113Z"
