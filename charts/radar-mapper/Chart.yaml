@@ -8,9 +8,6 @@ description: >
 name: radar-mapper
 version: 0.1.0
 icon: "http://radar-base.org/wp-content/uploads/2022/09/Logo_RADAR-Base-RGB.png"
-sources:
-  - https://github.com/RADAR-base/radar-helm-charts/tree/main/charts/radar-mapper
-  - https://github.com/RADAR-base/radar-mapper
 keywords:
   - radar-base
   - remote-trial
