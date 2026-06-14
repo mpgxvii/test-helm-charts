@@ -136,11 +136,11 @@ managementPortal:
   # Leave blank to derive it automatically as `{url}/oauth/token` (Management Portal built-in auth).
   # Set to a Hydra URL for Hydra-based deployments, e.g.:
   #   tokenUrl: "http://radar-hydra-public:4444/oauth2/token"
-  tokenUrl: ""
+  tokenUrl: "http://hydra-public:4444/oauth2/token"
   # -- OAuth2 scope(s) to request. Optional; leave blank to omit from the token request.
-  scope: ""
+  scope: "SUBJECT.READ PROJECT.READ""
   # -- OAuth2 audience. Optional; leave blank to omit from the token request.
-  audience: ""
+  audience: "res_ManagementPortal"
 
 # ── Enrichment ───────────────────────────────────────────────────────────────
 enrichment:
