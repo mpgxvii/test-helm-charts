@@ -6,7 +6,7 @@ description: >
   names via Management Portal and CSV lookup tables, and writes enriched ODM XML
   ready for REDCap import. Runs as a Kubernetes CronJob.
 name: radar-mapper
-version: 0.1.2
+version: 0.1.3
 icon: "http://radar-base.org/wp-content/uploads/2022/09/Logo_RADAR-Base-RGB.png"
 sources:
   - https://github.com/RADAR-base/radar-helm-charts/tree/main/charts/radar-mapper

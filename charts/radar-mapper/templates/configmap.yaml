@@ -27,12 +27,22 @@ data:
       {{- end }}
 
     enrichment:
-      {{- range $slot, $cfg := .Values.enrichment }}
-      {{ $slot }}:
-        source_field: {{ $cfg.sourceField | quote }}
+      {{- range .Values.enrichment }}
+      - name: {{ .name | quote }}
+        {{- if .sourceFields }}
+        source_fields:
+          {{- range .sourceFields }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- else }}
+        source_field: {{ .sourceField | quote }}
+        {{- end }}
+        {{- if .outputField }}
+        output_field: {{ .outputField | quote }}
+        {{- end }}
         provider:
-          type: {{ $cfg.provider.type | quote }}
-          {{- if eq $cfg.provider.type "management_portal" }}
+          type: {{ .provider.type | quote }}
+          {{- if eq .provider.type "management_portal" }}
           url: {{ $.Values.managementPortal.url | quote }}
           client_id: {{ $.Values.managementPortal.clientId | quote }}
           client_secret: {{ $.Values.managementPortal.clientSecret | quote }}
@@ -45,41 +55,28 @@ data:
           {{- if $.Values.managementPortal.audience }}
           audience: {{ $.Values.managementPortal.audience | quote }}
           {{- end }}
-          {{- if $cfg.provider.projects }}
+          {{- if .provider.projects }}
           projects:
-            {{- range $cfg.provider.projects }}
+            {{- range .provider.projects }}
             - {{ . | quote }}
             {{- end }}
           {{- end }}
-          subject_attribute: {{ $cfg.provider.subjectAttribute | quote }}
-          {{- else if eq $cfg.provider.type "csv" }}
-          path: {{ $cfg.provider.path | quote }}
-          {{- if $cfg.provider.keyColumn }}
-          key_column: {{ $cfg.provider.keyColumn | quote }}
+          subject_attribute: {{ .provider.subjectAttribute | quote }}
+          {{- else if eq .provider.type "csv" }}
+          path: {{ .provider.path | quote }}
+          {{- if .provider.keyColumn }}
+          key_column: {{ .provider.keyColumn | quote }}
           {{- end }}
-          {{- if $cfg.provider.keyColumns }}
+          {{- if .provider.keyColumns }}
           key_columns:
-            {{- range $cfg.provider.keyColumns }}
+            {{- range .provider.keyColumns }}
             - {{ . | quote }}
             {{- end }}
           {{- end }}
-          value_column: {{ $cfg.provider.valueColumn | quote }}
+          value_column: {{ .provider.valueColumn | quote }}
           {{- end }}
-        on_missing: {{ $cfg.onMissing }}
+        on_missing: {{ .onMissing }}
       {{- end }}
-
-    event_name:
-      source_fields:
-        {{- range .Values.eventName.sourceFields }}
-        - {{ . | quote }}
-        {{- end }}
-      provider:
-        path: /etc/radar-mapper/event-lookup.csv
-        key_columns:
-          - questionnaireName
-          - projectId
-        value_column: eventName
-      on_missing: {{ .Values.eventName.onMissing }}
 
     destination:
       type: {{ .Values.destination.type | quote }}
@@ -92,9 +89,13 @@ data:
         secret_key: {{ .Values.destination.s3.secretKey | quote }}
       {{- end }}
 
-  # ── event-lookup.csv ───────────────────────────────────────────────────────
-  # Questionnaire name + project ID → REDCap event name lookup table.
-  # Format: questionnaireName,projectId,eventName
-  event-lookup.csv: |
-{{ .Values.eventName.lookupCsv | indent 4 }}
+  # ── inline CSV files ───────────────────────────────────────────────────────
+  # Any enrichment entry with a lookupCsv value gets its content mounted as a
+  # file at the path specified in its provider config.
+  {{- range .Values.enrichment }}
+  {{- if .lookupCsv }}
+  {{ base .provider.path }}: |
+{{ .lookupCsv | indent 4 }}
+  {{- end }}
+  {{- end }}
 {{- end }}

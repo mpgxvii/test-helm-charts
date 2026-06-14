@@ -18,7 +18,13 @@ and setting existingSecret to its name. This keeps credentials in an encrypted
 Kubernetes Secret rather than a plain ConfigMap.
 {{- end }}
 
-{{- if .Values.eventName.lookupCsv | contains "#" }}
+{{- $hasOnlyComments := false }}
+{{- range .Values.enrichment }}
+{{- if and .lookupCsv (contains "#" .lookupCsv) }}
+{{- $hasOnlyComments = true }}
+{{- end }}
+{{- end }}
+{{- if $hasOnlyComments }}
 
 NOTE: The event-lookup.csv appears to contain only comments. Update
 eventName.lookupCsv in your values with the actual questionnaire→event mappings

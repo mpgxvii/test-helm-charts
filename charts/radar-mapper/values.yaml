@@ -143,10 +143,16 @@ managementPortal:
   audience: "res_ManagementPortal"
 
 # ── Enrichment ───────────────────────────────────────────────────────────────
+# Slots are applied in declaration order. Each slot's result is available to
+# subsequent slots. The event_name slot is required and must resolve to a valid
+# REDCap event name.
 enrichment:
-  record_id:
+  - # -- Slot name, used as the key in enriched fields
+    name: record_id
     # -- MappedRecord field to use as the lookup key
     sourceField: SubjectKey
+    # -- Output field to write the enriched value into (defaults to slot name)
+    outputField: SubjectKey
     provider:
       # -- Provider type: management_portal or csv
       type: management_portal
@@ -157,23 +163,31 @@ enrichment:
       # - MY-PROJECT-PROXY
       # -- Subject attribute key holding the REDCap record ID
       subjectAttribute: REDCapRecordId
-    # -- Behaviour when a subject has no record_id attribute: fail, warn, or skip
-    onMissing: fail
-
-# ── Event name ───────────────────────────────────────────────────────────────
-eventName:
-  # -- Ordered list of record fields to form the composite lookup key
-  sourceFields:
-    - StudyEventOID
-    - StudyOID
-  # -- Behaviour when no event name mapping is found: fail, warn, or skip
-  onMissing: fail
-  # -- Inline content of the event-lookup CSV mounted at /etc/radar-mapper/event-lookup.csv
-  # Format: questionnaireName,projectId,eventName
-  lookupCsv: |
-    questionnaireName,projectId,eventName
-    # Weekly|W1,MY-PROJECT,week_1_participant_arm_1
-    # Weekly|W6,MY-PROJECT,month_3_participant_arm_1
+    # -- Behaviour when a subject has no record_id attribute: warn, skip, or fail
+    onMissing: warn
+  - # -- Slot name, used as the key in enriched fields
+    name: event_name
+    # -- Ordered list of record fields to form the composite lookup key
+    sourceFields:
+      - StudyEventOID
+      - StudyOID
+    # -- Output field to write the enriched value into (defaults to slot name)
+    outputField: StudyEventOID
+    provider:
+      type: csv
+      path: /etc/radar-mapper/event-lookup.csv
+      keyColumns:
+        - questionnaireName
+        - projectId
+      valueColumn: eventName
+    # -- Behaviour when no event name mapping is found: warn, skip, or fail
+    onMissing: warn
+    # -- Inline content of the CSV file mounted at the provider path above.
+    # Format: questionnaireName,projectId,eventName
+    lookupCsv: |
+      questionnaireName,projectId,eventName
+      # Weekly|W1,MY-PROJECT,week_1_participant_arm_1
+      # Weekly|W6,MY-PROJECT,month_3_participant_arm_1
 
 # ── Network policy ───────────────────────────────────────────────────────────
 # -- Network policy defines pod egress rules.
