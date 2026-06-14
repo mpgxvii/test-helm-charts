@@ -132,6 +132,15 @@ managementPortal:
   clientId: radar_mapper
   # -- OAuth2 client secret (stored in Secret)
   clientSecret: ""
+  # -- OAuth2 token endpoint URL.
+  # Leave blank to derive it automatically as `{url}/oauth/token` (Management Portal built-in auth).
+  # Set to a Hydra URL for Hydra-based deployments, e.g.:
+  #   tokenUrl: "http://radar-hydra-public:4444/oauth2/token"
+  tokenUrl: ""
+  # -- OAuth2 scope(s) to request. Optional; leave blank to omit from the token request.
+  scope: ""
+  # -- OAuth2 audience. Optional; leave blank to omit from the token request.
+  audience: ""
 
 # ── Enrichment ───────────────────────────────────────────────────────────────
 enrichment:

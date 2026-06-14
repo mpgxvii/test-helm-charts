@@ -36,6 +36,15 @@ data:
           url: {{ $.Values.managementPortal.url | quote }}
           client_id: {{ $.Values.managementPortal.clientId | quote }}
           client_secret: {{ $.Values.managementPortal.clientSecret | quote }}
+          {{- if $.Values.managementPortal.tokenUrl }}
+          token_url: {{ $.Values.managementPortal.tokenUrl | quote }}
+          {{- end }}
+          {{- if $.Values.managementPortal.scope }}
+          scope: {{ $.Values.managementPortal.scope | quote }}
+          {{- end }}
+          {{- if $.Values.managementPortal.audience }}
+          audience: {{ $.Values.managementPortal.audience | quote }}
+          {{- end }}
           {{- if $cfg.provider.projects }}
           projects:
             {{- range $cfg.provider.projects }}
