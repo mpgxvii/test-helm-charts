@@ -20,7 +20,7 @@ Kubernetes Secret rather than a plain ConfigMap.
 
 {{- $hasOnlyComments := false }}
 {{- range .Values.enrichment }}
-{{- if and .lookupCsv (contains "#" .lookupCsv) }}
+{{- if and .provider.lookupCsv (contains "#" .provider.lookupCsv) }}
 {{- $hasOnlyComments = true }}
 {{- end }}
 {{- end }}

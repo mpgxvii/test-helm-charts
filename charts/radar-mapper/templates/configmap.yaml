@@ -93,9 +93,9 @@ data:
   # Any enrichment entry with a lookupCsv value gets its content mounted as a
   # file at the path specified in its provider config.
   {{- range .Values.enrichment }}
-  {{- if .lookupCsv }}
+  {{- if .provider.lookupCsv }}
   {{ base .provider.path }}: |
-{{ .lookupCsv | indent 4 }}
+{{ .provider.lookupCsv | indent 4 }}
   {{- end }}
   {{- end }}
 {{- end }}

@@ -180,14 +180,14 @@ enrichment:
         - questionnaireName
         - projectId
       valueColumn: eventName
+      # -- Inline content of the CSV file mounted at the provider path above.
+      # Format: questionnaireName,projectId,eventName
+      lookupCsv: |
+        questionnaireName,projectId,eventName
+        # Weekly|W1,MY-PROJECT,week_1_participant_arm_1
+        # Weekly|W6,MY-PROJECT,month_3_participant_arm_1
     # -- Behaviour when no event name mapping is found: warn, skip, or fail
     onMissing: warn
-    # -- Inline content of the CSV file mounted at the provider path above.
-    # Format: questionnaireName,projectId,eventName
-    lookupCsv: |
-      questionnaireName,projectId,eventName
-      # Weekly|W1,MY-PROJECT,week_1_participant_arm_1
-      # Weekly|W6,MY-PROJECT,month_3_participant_arm_1
 
 # ── Network policy ───────────────────────────────────────────────────────────
 # -- Network policy defines pod egress rules.
