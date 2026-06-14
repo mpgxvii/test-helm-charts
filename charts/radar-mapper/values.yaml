@@ -189,6 +189,16 @@ enrichment:
     # -- Behaviour when no event name mapping is found: warn, skip, or fail
     onMissing: warn
 
+# ── Filter ───────────────────────────────────────────────────────────────────
+filter:
+  # -- Item OIDs to strip from every record before writing.
+  # The record is kept; only the matching items are removed.
+  # Use this for instruction or display-only items that should not appear in
+  # the destination output (e.g. pacq_instructions_1).
+  excludeItems: []
+  # - pacq_instructions_1
+  # - some_display_item
+
 # ── Network policy ───────────────────────────────────────────────────────────
 # -- Network policy defines pod egress rules.
 # @default -- check `values.yaml`

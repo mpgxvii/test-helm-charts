@@ -78,6 +78,14 @@ data:
         on_missing: {{ .onMissing }}
       {{- end }}
 
+    {{- if .Values.filter.excludeItems }}
+    filter:
+      exclude_items:
+        {{- range .Values.filter.excludeItems }}
+        - {{ . | quote }}
+        {{- end }}
+    {{- end }}
+
     destination:
       type: {{ .Values.destination.type | quote }}
       path: {{ .Values.destination.path | quote }}
