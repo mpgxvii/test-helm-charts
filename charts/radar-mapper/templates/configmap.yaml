@@ -1,0 +1,91 @@
+{{- if not .Values.existingSecret }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+data:
+  # ── mapper.yml ─────────────────────────────────────────────────────────────
+  # Full application configuration. Credentials are embedded here from Helm
+  # values. For production deployments where credential exposure in ConfigMaps
+  # is a concern, pre-create a Kubernetes Secret containing 'mapper.yml' and
+  # reference it via existingSecret.
+  mapper.yml: |
+    source:
+      type: {{ .Values.source.type | quote }}
+      path: {{ .Values.source.path | quote }}
+      {{- if eq .Values.source.type "s3" }}
+      s3:
+        endpoint: {{ .Values.source.s3.endpoint | quote }}
+        bucket: {{ .Values.source.s3.bucket | quote }}
+        access_token: {{ .Values.source.s3.accessToken | quote }}
+        secret_key: {{ .Values.source.s3.secretKey | quote }}
+      {{- end }}
+
+    enrichment:
+      {{- range $slot, $cfg := .Values.enrichment }}
+      {{ $slot }}:
+        source_field: {{ $cfg.sourceField | quote }}
+        provider:
+          type: {{ $cfg.provider.type | quote }}
+          {{- if eq $cfg.provider.type "management_portal" }}
+          url: {{ $.Values.managementPortal.url | quote }}
+          client_id: {{ $.Values.managementPortal.clientId | quote }}
+          client_secret: {{ $.Values.managementPortal.clientSecret | quote }}
+          {{- if $cfg.provider.projects }}
+          projects:
+            {{- range $cfg.provider.projects }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          subject_attribute: {{ $cfg.provider.subjectAttribute | quote }}
+          {{- else if eq $cfg.provider.type "csv" }}
+          path: {{ $cfg.provider.path | quote }}
+          {{- if $cfg.provider.keyColumn }}
+          key_column: {{ $cfg.provider.keyColumn | quote }}
+          {{- end }}
+          {{- if $cfg.provider.keyColumns }}
+          key_columns:
+            {{- range $cfg.provider.keyColumns }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          value_column: {{ $cfg.provider.valueColumn | quote }}
+          {{- end }}
+        on_missing: {{ $cfg.onMissing }}
+      {{- end }}
+
+    event_name:
+      source_fields:
+        {{- range .Values.eventName.sourceFields }}
+        - {{ . | quote }}
+        {{- end }}
+      provider:
+        path: /etc/radar-mapper/event-lookup.csv
+        key_columns:
+          - questionnaireName
+          - projectId
+        value_column: eventName
+      on_missing: {{ .Values.eventName.onMissing }}
+
+    destination:
+      type: {{ .Values.destination.type | quote }}
+      path: {{ .Values.destination.path | quote }}
+      {{- if eq .Values.destination.type "s3" }}
+      s3:
+        endpoint: {{ .Values.destination.s3.endpoint | quote }}
+        bucket: {{ .Values.destination.s3.bucket | quote }}
+        access_token: {{ .Values.destination.s3.accessToken | quote }}
+        secret_key: {{ .Values.destination.s3.secretKey | quote }}
+      {{- end }}
+
+  # ── event-lookup.csv ───────────────────────────────────────────────────────
+  # Questionnaire name + project ID → REDCap event name lookup table.
+  # Format: questionnaireName,projectId,eventName
+  event-lookup.csv: |
+{{ .Values.eventName.lookupCsv | indent 4 }}
+{{- end }}
