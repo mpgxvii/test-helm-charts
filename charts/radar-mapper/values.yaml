@@ -138,7 +138,7 @@ managementPortal:
   #   tokenUrl: "http://radar-hydra-public:4444/oauth2/token"
   tokenUrl: "http://hydra-public:4444/oauth2/token"
   # -- OAuth2 scope(s) to request. Optional; leave blank to omit from the token request.
-  scope: "SUBJECT.READ PROJECT.READ""
+  scope: "SUBJECT.READ PROJECT.READ"
   # -- OAuth2 audience. Optional; leave blank to omit from the token request.
   audience: "res_ManagementPortal"
 
