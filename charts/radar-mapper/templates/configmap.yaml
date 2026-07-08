@@ -40,6 +40,15 @@ data:
         {{- if .outputField }}
         output_field: {{ .outputField | quote }}
         {{- end }}
+        {{- if .addAsItem }}
+        add_as_item: true
+        {{- end }}
+        {{- if .match }}
+        match:
+          {{- range $field, $value := .match }}
+          {{ $field }}: {{ $value | quote }}
+          {{- end }}
+        {{- end }}
         provider:
           type: {{ .provider.type | quote }}
           {{- if eq .provider.type "management_portal" }}

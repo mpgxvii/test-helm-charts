@@ -189,6 +189,28 @@ enrichment:
     # -- Behaviour when no event name mapping is found: warn, skip, or fail
     onMissing: warn
 
+  # ── Conditional enrichment with add_as_item and match ────────────────────
+  # Use add_as_item to inject the enriched value as an <ItemData> element.
+  # Use match to apply a slot only to records matching specific field values.
+  #
+  # - name: weekly_score
+  #   sourceField: SubjectKey
+  #   outputField: weekly_calculated_score
+  #   addAsItem: true
+  #   match:
+  #     FormOID: Weekly
+  #     StudyOID: MY-PROJECT
+  #   provider:
+  #     type: csv
+  #     path: /etc/radar-mapper/weekly-scores.csv
+  #     keyColumn: userId
+  #     valueColumn: score
+  #     lookupCsv: |
+  #       userId,score
+  #       1,85
+  #       2,90
+  #   onMissing: warn
+
 # ── Filter ───────────────────────────────────────────────────────────────────
 filter:
   # -- Item OIDs to strip from every record before writing.
