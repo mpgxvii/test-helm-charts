@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  config.yaml: |
+    service:
+      # Whether to run the application as a polling service.
+      enable: true
+      # Polling interval in seconds.
+      interval: {{ .Values.worker.interval | int }}
+
+    {{- with .Values.source }}
+    source:
+      type: "{{ .type }}"
+      # Minio S3 settings
+      s3:
+        endpoint: "{{ .s3.endpoint }}"
+        bucket: "{{ .s3.bucket }}"
+        {{- if .s3.connectTimeout }}
+        connectTimeout: {{ .s3.connectTimeout | int }}
+        {{- end }}
+        {{- if .s3.writeTimeout }}
+        writeTimeout: {{ .s3.writeTimeout | int }}
+        {{- end }}
+        {{- if .s3.readTimeout }}
+        readTimeout: {{ .s3.readTimeout | int }}
+        {{- end }}
+      azure:
+        endpoint: "{{ .azure.endpoint }}"
+        container: "{{ .azure.container }}"
+        {{- if .azure.connectTimeout }}
+        connectTimeout: {{ .azure.connectTimeout | int }}
+        {{- end }}
+        {{- if .azure.responseTimeout }}
+        responseTimeout: {{ .azure.responseTimeout | int }}
+        {{- end }}
+        {{- if .azure.writeTimeout }}
+        writeTimeout: {{ .azure.writeTimeout | int }}
+        {{- end }}
+        {{- if .azure.readTimeout }}
+        readTimeout: {{ .azure.readTimeout | int }}
+        {{- end }}
+      index:
+        fullSyncInterval: {{ .index.fullSyncInterval | int }}
+        emptyDirectorySyncInterval: {{ .index.emptyDirectorySyncInterval | int }}
+    {{- end }}
+
+    {{- with .Values.target }}
+    target:
+      type: "{{ .type }}"
+      # Minio S3 settings
+      s3:
+        endpoint: "{{ .s3.endpoint }}"
+        bucket: "{{ .s3.bucket }}"
+        {{- if .s3.connectTimeout }}
+        connectTimeout: {{ .s3.connectTimeout | int }}
+        {{- end }}
+        {{- if .s3.writeTimeout }}
+        writeTimeout: {{ .s3.writeTimeout | int }}
+        {{- end }}
+        {{- if .s3.readTimeout }}
+        readTimeout: {{ .s3.readTimeout | int }}
+        {{- end }}
+      azure:
+        endpoint: "{{ .azure.endpoint }}"
+        container: "{{ .azure.container }}"
+        {{- if .azure.connectTimeout }}
+        connectTimeout: {{ .azure.connectTimeout | int }}
+        {{- end }}
+        {{- if .azure.responseTimeout }}
+        responseTimeout: {{ .azure.responseTimeout | int }}
+        {{- end }}
+        {{- if .azure.writeTimeout }}
+        writeTimeout: {{ .azure.writeTimeout | int }}
+        {{- end }}
+        {{- if .azure.readTimeout }}
+        readTimeout: {{ .azure.readTimeout | int }}
+        {{- end }}
+    {{- end }}
+
+    redis:
+      uri: "{{ .Values.redis.uri }}"
+      lockPrefix: radar-output/lock
+
+    # Compression characteristics
+    compression:
+      # Compression type: none, zip or gzip
+      type: {{ .Values.compression.type }}
+      # Compression Factory class
+      # factory: org.radarbase.output.data.CompressionFactory
+      # Additional compression properties
+      # properties: {}
+
+    # File format
+    format:
+      # Format type: csv, json, or odm
+      type: {{ .Values.format.type }}
+      # Whether to deduplicate the files in each topic by default
+      deduplication:
+        enable: {{ .Values.deduplication.enable }}
+      {{- if .Values.format.properties }}
+      properties:
+{{ toYaml .Values.format.properties | indent 8 }}
+      {{- end }}
+
+    # Worker settings
+    worker:
+      # Maximum number of files and converters to keep open while processing
+      cacheSize: {{ .Values.worker.cacheSize | int }}
+      # Maximum number of offsets in cache.
+      cacheOffsetsSize: {{ .Values.worker.cacheOffsetsSize | int }}
+      # Number of threads to do processing with
+      numThreads: {{ .Values.worker.numThreads | int }}
+      # Maximum number of files to process in any given topic.
+      maxFilesPerTopic: {{ .Values.worker.maxFilesPerTopic | int }}
+      minimumFileAge: {{ .Values.worker.minimumFileAge | int }}
+
+    cleaner:
+      # Enable cleaning up old source files
+      enable: {{ gt (int (toString (.Values.cleaner.age))) 0 }}
+      # Interval in seconds to clean data
+      interval: {{ .Values.cleaner.interval | int }}
+      # Number of days after which a source file is considered old
+      age: {{ .Values.cleaner.age }}
+
+    # Path settings
+    paths:
+      # Input directories
+      inputs:
+        - "{{ .Values.paths.input }}"
+      # Root temporary directory for local file processing.
+      temp: /output/+tmp
+      # Output directory
+      output: "{{ .Values.paths.output }}"
+      # Output path construction factory
+      factory: {{ .Values.paths.factory }}
+
+      # Global path formatter config (FormattedPathFactory)
+      path:
+        format: {{ .Values.paths.path.format | quote }}
+        {{- if .Values.paths.path.plugins }}
+        plugins: {{ .Values.paths.path.plugins | quote }}
+        {{- end }}
+        {{- if .Values.paths.path.properties }}
+        properties:
+{{ toYaml .Values.paths.path.properties | indent 10 }}
+        {{- end }}
+      # Optional: legacy/general plugin properties merged into path.properties by the app
+      {{- if .Values.paths.properties }}
+      properties:
+{{ toYaml .Values.paths.properties | indent 8 }}
+      {{- end }}
+
+    # Individual topic configuration
+    {{- if .Values.topics }}
+    topics:
+      {{ .Values.topics | toYaml | indent 6 | trim }}
+    {{- else }}
+    topics: {}
+    {{- end }}

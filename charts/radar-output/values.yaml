@@ -1,0 +1,318 @@
+# Default values for radar-output.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of radar-output replicas to deploy
+replicaCount: 1
+
+image:
+  # -- Image registry
+  registry: ghcr.io
+  # -- Image repository
+  repository: radar-base/radar-output-restructure/radar-output-restructure
+  # -- Image tag (immutable tags are recommended)
+  # Overrides the image tag whose default is the chart appVersion.
+  tag:
+  # -- Image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  digest: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Optionally specify an array of imagePullSecrets.
+  # Secrets must be manually created in the namespace.
+  # e.g:
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+  #
+  pullSecrets: []
+
+# -- String to partially override radar-output.fullname template with a string (will prepend the release name)
+nameOverride: ""
+# -- String to fully override radar-output.fullname template with a string
+fullnameOverride: ""
+
+# -- Configure radar-output pods' Security Context
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Configure radar-output containers' Security Context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 101
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+
+  # -- CPU/Memory resource limits
+  limits:
+    cpu: 1000m
+  # -- CPU/Memory resource requests
+  requests:
+    cpu: 100m
+    memory: 2Gi
+
+# -- Node labels for pod assignment
+nodeSelector: {}
+
+# -- Toleration labels for pod assignment
+tolerations: []
+
+# -- Affinity labels for pod assignment
+affinity: {}
+
+# -- Extra environment variables
+extraEnvVars: []
+#  - name: BEARER_AUTH
+#    value: true
+
+# -- Network policy defines who can access this application and who this applications has access to
+# @default -- check `values.yaml`
+networkpolicy:
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: 'minio'
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: '{{ .Release.Namespace }}'
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: 'radar-redis'
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+      - port: 53
+        protocol: UDP
+      - port: 53
+        protocol: TCP
+
+javaOpts: "-Xms400m -Xmx3g"
+
+# -- Existing secret for storing S3 or Azure credentials.
+existingSecret:
+
+source:
+  # -- Type of the intermediate storage of the RADAR-base pipeline (e.g., s3 or azure)
+  type: s3
+  s3:
+    # -- s3 endpoint of the intermediate storage
+    endpoint: "http://minio:9000"
+    # -- s3 access-key of the intermediate storage
+    accessToken: access_key
+    # -- s3 secret-key of the intermediate storage
+    secretKey: secret
+    # -- s3 bucket name of the intermediate storage
+    bucket: radar-intermediate-storage
+    # -- s3 HTTP connect timeout in seconds
+    connectTimeout:
+    # -- s3 HTTP write timeout in seconds
+    writeTimeout:
+    # -- s3 HTTP read timeout in seconds
+    readTimeout:
+  azure:
+    # -- Azure endpoint of the intermediate storage
+    endpoint: ""
+    # -- Azure username to access the s3 endpoint when using personal login
+    username: ""
+    # -- Azure password when using personal login
+    password: ""
+    # -- Azure account name when using shared access tokens
+    accountName: ""
+    # -- Azure account key when using shared access tokens
+    accountKey: ""
+    # -- Azure SAS(shared access signature) token when using shared access tokens
+    sasToken: ""
+    # -- Azure blob container name
+    container: ""
+    # -- Azure HTTP connect timeout in seconds
+    connectTimeout:
+    # -- Azure HTTP response timeout in seconds
+    responseTimeout:
+    # -- Azure HTTP write timeout in seconds
+    writeTimeout:
+    # -- Azure HTTP read timeout in seconds
+    readTimeout:
+  index:
+    # -- Interval in seconds to synchronize the index with the storage (in seconds).
+    # This values should be only changed in specific scenarios (e.g. e2e testing).
+    fullSyncInterval: 3600
+    # -- Interval in seconds to also include empty directories during sync with the storage (in seconds).
+    # This values should be only changed in specific scenarios (e.g. e2e testing).
+    emptyDirectorySyncInterval: 900
+
+target:
+  # -- Type of the output storage of the RADAR-base pipeline (e.g., s3 or azure)
+  type: s3
+  s3:
+    # -- s3 endpoint of the output storage
+    endpoint: "http://minio:9000"
+    # -- s3 access-key of the output storage
+    accessToken: access_key
+    # -- s3 secret-key of the output storage
+    secretKey: secret
+    # -- s3 bucket name of the output storage
+    bucket: radar-output-storage
+    # -- s3 HTTP connect timeout in seconds
+    connectTimeout:
+    # -- s3 HTTP write timeout in seconds
+    writeTimeout:
+    # -- s3 HTTP read timeout in seconds
+    readTimeout:
+  azure:
+    # -- Azure endpoint of the output storage
+    endpoint: ""
+    # -- Azure username to access the s3 endpoint when using personal login
+    username: ""
+    # -- Azure password when using personal login
+    password: ""
+    # -- Azure account name when using shared access tokens
+    accountName: ""
+    # -- Azure account key when using shared access tokens
+    accountKey: ""
+    # -- Azure SAS(shared access signature) token when using shared access tokens
+    sasToken: ""
+    # -- Azure blob container name
+    container: ""
+    # -- Azure HTTP connect timeout in seconds
+    connectTimeout:
+    # -- Azure HTTP response timeout in seconds
+    responseTimeout:
+    # -- Azure HTTP write timeout in seconds
+    writeTimeout:
+    # -- Azure HTTP read timeout in seconds
+    readTimeout:
+
+redis:
+  # -- URL of the redis database
+  uri: redis://radar-redis-replication-master:6379
+
+worker:
+  # -- Scanning interval (seconds)
+  interval: 90
+  # -- Maximum number of files and converters to keep open while processing
+  cacheSize: 300
+  # -- Maximum number of offsets in cache.
+  cacheOffsetsSize: 500000
+  # -- Minimum amount of time in seconds since a file was last modified for it to be considered for processing.
+  minimumFileAge: 900
+  # -- Maximum number of files to process in a single poll operation. Reduce to get more parallel workloads, increase to avoid idling too much if the individual file sizes are very small.
+  maxFilesPerTopic: 20
+  # -- Number of threads to do processing on
+  numThreads: 2
+
+cleaner:
+  # -- Number of days after which a source file is considered old
+  age: 7
+  # -- Interval in seconds between cleanups
+  interval: 86400
+
+paths:
+  # -- Relative path to intermediate storage root to browse for data
+  input: topics
+  # -- Relative path to output storage to write data
+  output: output
+  # -- Output path construction factory
+  factory: org.radarbase.output.path.FormattedPathFactory
+  path:
+    # -- Output path format
+    format: ${projectId}/${userId}/${topic}/${filename}
+    # -- Output path plugins
+    # plugins: fixed time key value
+  # -- Additional properties. For details see https://github.com/RADAR-base/radar-output-restructure/blob/master/restructure.yml
+  properties: {}
+
+# -- Individual topic configuration
+topics:
+  questionnaire_response:
+    pathProperties:
+      # -- Alternative path output of the questionnaire_response topic
+      format: ${projectId}/${userId}/${topic}/${value:name}/${filename}
+      # -- Alternative path plugins of the questionnaire_response topic
+      plugins: fixed value
+  #  # topic name
+  #  connect_fitbit_source:
+  #    # deduplicate this topic, regardless of the format settings
+  #    deduplication:
+  #      # deduplicate this topic only using given fields.
+  #      distinctFields: [value.time]
+  #  connect_fitbit_bad:
+  #    # Do not process this topic
+  #    exclude: true
+  #  biovotion_acceleration:
+  #    # Disable deduplication
+  #    deduplication:
+  #      enable: false
+
+format:
+  # -- Output format type: csv, json, or odm
+  type: csv
+  # -- Additional format properties (e.g., ODM field mappings when type is odm)
+  # @default -- `{}`
+  # Example for ODM:
+  #   metadataVersionOid: v1.0.0
+  #   subjectKeyField: key.userId
+  #   projectIdField: key.projectId
+  #   studyEventOidField: value.name
+  #   formOidField: value.name
+  #   answersField: value.answers
+  #   itemOidField: questionId
+  #   itemValueField: value
+  #   itemGroupOidTemplate: "{formOid}_IG"
+  #   igRepeatKey: "1"
+  #   repeatKeySeparator: "|"
+  #   dateInputFormat: '{"day":dd,"month":MMM,"year":yyyy}'
+  #   dateOutputFormat: yyyy-MM-dd
+  properties: {}
+
+deduplication:
+  # -- Whether to enable deduplication
+  enable: true
+
+compression:
+  # -- Compression type to use for output files. Can be one of: gzip, zip, none
+  type: gzip
+
+# Pod Disruption Budget configuration
+podDisruptionBudget:
+  # -- Enable Pod Disruption Budget
+  enabled: false
+  # -- Minimum number of pods that must be available during disruptions
+  minAvailable: 1
+  # -- Maximum number of pods that can be unavailable during disruptions
+  maxUnavailable: ~
+
+# Horizontal Pod Autoscaler
+hpa:
+  # -- Enable HPA
+  enabled: false
+  # -- Maximum number of replicas
+  maxReplicas: 5
+  # -- Target CPU utilization percentage
+  targetCPU: 80
+  # -- Target Memory utilization percentage
+  targetMemory: ~
