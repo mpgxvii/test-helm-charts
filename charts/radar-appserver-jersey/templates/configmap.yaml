@@ -59,6 +59,11 @@ data:
       {{- end }}
       {{- end }}
 
+    db:
+      liquibase:
+        enabled: {{ .Values.postgres.liquibase.enabled }}
+        changelogs: {{ .Values.postgres.liquibase.changelogs }}
+
     email:
       enabled: false
 
