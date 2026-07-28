@@ -246,6 +246,11 @@ paths:
   # -- Additional properties. For details see https://github.com/RADAR-base/radar-output-restructure/blob/master/restructure.yml
   properties: {}
 
+# -- Project whitelist: if set, only records from these projects are written. Empty means all projects.
+includeProjectIds: []
+#  - RECURRENT-GB
+#  - RECURRENT-GB-Proxy
+
 # -- Individual topic configuration
 topics:
   questionnaire_response:

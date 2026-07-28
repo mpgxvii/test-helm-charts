@@ -157,6 +157,11 @@ data:
 {{ toYaml .Values.paths.properties | indent 8 }}
       {{- end }}
 
+    {{- if .Values.includeProjectIds }}
+    includeProjectIds:
+      {{- .Values.includeProjectIds | toYaml | nindent 6 }}
+    {{- end }}
+
     # Individual topic configuration
     {{- if .Values.topics }}
     topics:
