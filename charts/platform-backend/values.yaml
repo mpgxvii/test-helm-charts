@@ -266,6 +266,80 @@ services:
           clientSecret: your-client-secret-here
           tokenEndpoint: http://hydra-public:4444/hydra/oauth2/token
           scope: service-api
+        dataSource:
+          type: grafana
+        grafana:
+          baseUrl: http://radar-grafana:80
+          serviceAccountToken: ""
+          datasourceUid: ""
+        trino:
+          coordinatorUrl: http://trino:8080
+          catalog: timeseries
+          schema: metrics
+          username: data-service
+        bigquery:
+          projectId: radar-armt-notification
+          dataset: ""
+          observationTable: observation
+          credentialsPath: ""
+          tables:
+            - name: questionnairesFinished60Days
+              table: questionnaires_finished_60_days
+              timestampColumn: event_timestamp
+              subjectColumn: subjectId
+              projectColumn: projectId
+              extraColumns:
+                - questionnaireName
+              description: Questionnaires finished within 60 days per subject/project
+        limits:
+          maxTimeRangeDays: 90
+          maxDataPoints: 10000
+        metrics:
+          - name: steps
+            sourceName: fitbit
+            topicName: connect_fitbit_intraday_steps
+            description: Steps from Fitbit device
+          - name: heartrate
+            sourceName: fitbit
+            topicName: connect_fitbit_intraday_heart_rate
+            description: Heart rate from Fitbit device
+          - name: restingHeartRate
+            sourceName: fitbit
+            topicName: connect_fitbit_resting_heart_rate
+            description: Resting heart rate from Fitbit device
+          - name: steps
+            sourceName: oura
+            topicName: connect_oura_motion_count
+            description: Steps/motion count from Oura ring
+          - name: heartrate
+            sourceName: oura
+            topicName: connect_oura_heart_rate
+            description: Heart rate from Oura ring
+          - name: heartRateVariability
+            sourceName: oura
+            topicName: connect_oura_heart_rate_variability
+            description: Heart rate variability from Oura ring
+          - name: steps
+            sourceName: garmin
+            topicName: android_garmin_generic_steps
+            description: Steps from Garmin device
+          - name: heartrate
+            sourceName: garmin
+            topicName: android_garmin_generic_heart_rate
+            description: Heart rate from Garmin device
+          - name: steps
+            sourceName: apple
+            topicName: active_apple_healthkit_steps
+            description: Steps from Apple HealthKit
+          - name: heartrate
+            sourceName: apple
+            topicName: active_apple_healthkit_heart_rate
+            description: Heart rate from Apple HealthKit
+          - name: cocaineUse
+            sourceName: questionnaire
+            category: "8PM Survey"
+            variable: fixedq1a
+            description: Cocaine use from 8PM Survey questionnaire
     extraVolumes: []
     extraVolumeMounts: []
 
