@@ -82,7 +82,7 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or $svc.extraVolumeMounts (and $svc.config $svc.config.enabled) }}
+          {{- if or $svc.extraVolumeMounts (and $svc.config $svc.config.enabled) $svc.bigqueryServiceAccount }}
           volumeMounts:
             {{- with $svc.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -91,6 +91,12 @@ spec:
             - name: config
               mountPath: {{ default "/config.yaml" $svc.config.mountPath }}
               subPath: config.yaml
+            {{- end }}
+            {{- if $svc.bigqueryServiceAccount }}
+            - name: bigquery-sa
+              mountPath: /etc/data-service/service-account.json
+              subPath: service-account.json
+              readOnly: true
             {{- end }}
           {{- end }}
       {{- with $root.Values.global.nodeSelector }}
@@ -105,12 +111,17 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or $svc.extraVolumes (and $svc.config $svc.config.enabled) }}
+      {{- if or $svc.extraVolumes (and $svc.config $svc.config.enabled) $svc.bigqueryServiceAccount }}
       volumes:
         {{- if and $svc.config $svc.config.enabled }}
         - name: config
           configMap:
             name: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}-config
+        {{- end }}
+        {{- if $svc.bigqueryServiceAccount }}
+        - name: bigquery-sa
+          secret:
+            secretName: {{ include "platform-backend.serviceFullname" (dict "root" $root "serviceName" $name) }}-bigquery-sa
         {{- end }}
         {{- with $svc.extraVolumes }}
         {{- toYaml . | nindent 8 }}
