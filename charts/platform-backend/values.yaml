@@ -281,7 +281,7 @@ services:
           projectId: radar-armt-notification
           dataset: ""
           observationTable: observation
-          credentialsPath: ""
+          credentialsPath: /etc/data-service/service-account.json
           tables:
             - name: questionnairesFinished60Days
               table: questionnaires_finished_60_days
@@ -340,8 +340,27 @@ services:
             category: "8PM Survey"
             variable: fixedq1a
             description: Cocaine use from 8PM Survey questionnaire
-    extraVolumes: []
-    extraVolumeMounts: []
+    bigqueryServiceAccount:
+      type: service_account
+      projectId: ""
+      privateKeyId: ""
+      privateKey: ""
+      clientEmail: ""
+      clientId: ""
+      authUri: https://accounts.google.com/o/oauth2/auth
+      tokenUri: https://oauth2.googleapis.com/token
+      authProviderX509CertUrl: https://www.googleapis.com/oauth2/v1/certs
+      clientX509CertUrl: ""
+      universeDomain: googleapis.com
+    extraVolumes:
+      - name: bigquery-sa
+        secret:
+          secretName: platform-backend-data-service-bigquery-sa
+    extraVolumeMounts:
+      - name: bigquery-sa
+        mountPath: /etc/data-service/service-account.json
+        subPath: service-account.json
+        readOnly: true
 
   data-sources-service:
     enabled: true
