@@ -340,6 +340,19 @@ services:
             category: "8PM Survey"
             variable: fixedq1a
             description: Cocaine use from 8PM Survey questionnaire
+    bigqueryServiceAccount: {}
+    # bigqueryServiceAccount:
+    #   type: service_account
+    #   projectId: ""
+    #   privateKeyId: ""
+    #   privateKey: ""
+    #   clientEmail: ""
+    #   clientId: ""
+    #   authUri: https://accounts.google.com/o/oauth2/auth
+    #   tokenUri: https://oauth2.googleapis.com/token
+    #   authProviderX509CertUrl: https://www.googleapis.com/oauth2/v1/certs
+    #   clientX509CertUrl: ""
+    #   universeDomain: googleapis.com
     extraVolumes: []
     extraVolumeMounts: []
 
