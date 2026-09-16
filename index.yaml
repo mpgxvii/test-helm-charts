@@ -1503,6 +1503,38 @@ entries:
       artifacthub.io/license: Apache-2.0
     apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-09-16T19:03:47.324688314Z"
+    dependencies:
+    - name: common
+      repository: https://radar-base.github.io/radar-helm-charts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: A Helm chart for RADAR-base Self Enrolment UI
+    digest: b3727599179cd4f65e7edcad4c71fb88e6eada36b47781b78a8b9cfd7f9bf23d
+    home: https://radar-base.org
+    icon: http://radar-base.org/wp-content/uploads/2022/09/Logo_RADAR-Base-RGB.png
+    keywords:
+    - radar-base
+    - remote-trial
+    maintainers:
+    - email: yatharth.ranjan@kcl.ac.uk
+      name: Yatharth Ranjan
+      url: https://www.kcl.ac.uk/people/yatharth-ranjan
+    - email: pauline.conde@kcl.ac.uk
+      name: Pauline Conde
+      url: https://www.kcl.ac.uk/people/pauline-conde
+    name: radar-self-enrolment-ui
+    sources:
+    - https://github.com/RADAR-base/radar-helm-charts/tree/main/charts/radar-self-enrolment-ui
+    type: application
+    urls:
+    - https://github.com/mpgxvii/test-helm-charts/releases/download/radar-self-enrolment-ui-0.4.3/radar-self-enrolment-ui-0.4.3.tgz
+    version: 0.4.3
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: 0.1.0
     created: "2025-12-18T12:15:56.351463952Z"
     description: A Helm chart for RADAR-base Self Enrolment UI
     digest: 5d3fefef1b043e003a9fd3e6ea786ccaddb2a9b4d9ac56c6e9970a21a7242385
@@ -1577,4 +1609,4 @@ entries:
     urls:
     - https://github.com/mpgxvii/test-helm-charts/releases/download/radar-self-enrolment-ui-0.4.0/radar-self-enrolment-ui-0.4.0.tgz
     version: 0.4.0
-generated: "2026-09-14T22:05:13.316139375Z"
+generated: "2026-09-16T19:03:47.324804899Z"
