@@ -1,8 +1,7 @@
 {{- if .Values.ingress.enabled -}}
-{{- $path := .Values.ingress.path -}}
 {{- $hosts := .Values.ingress.hosts -}}
 {{- $svcPort := .Values.service.port -}}
-{{- $pathType := .Values.ingress.pathType -}}
+{{- $basePath := printf "/%s" .Values.basePath -}}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else -}}
@@ -33,10 +32,22 @@ spec:
     - host: {{ tpl . $ | quote }}
       http:
         paths:
-          - path: {{ $path | quote }}
-            {{- if and $pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-            pathType: {{ $pathType }}
+          - path: {{ $basePath | quote }}
+            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
+            pathType: Prefix
             {{- end }}
             backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+          - path: "/_rse"
+            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
+            pathType: Prefix
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+          {{- range $.Values.ingress.additionalPaths }}
+          - path: {{ .path | quote }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+          {{- end }}
   {{- end }}
 {{- end }}

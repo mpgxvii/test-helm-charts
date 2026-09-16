@@ -58,9 +58,9 @@ spec:
           - name: RSA_FRONTEND_URL
             value: {{ tpl .Values.rest_sources_auth.frontendUrl . | quote }}
 
-          # Base path configuration
-          - name: BASEPATH
-            value: {{ .Values.basePath | quote }}
+          # Base path prefix (runtime, used by middleware and withBasePath)
+          - name: NEXT_PUBLIC_BASEPATH
+            value: {{ printf "/%s" .Values.basePath | quote }}
 
           # Authentication clients (ARMT, PRMT, SEP)
           - name: ARMT_CLIENT_ID
@@ -121,7 +121,7 @@ spec:
           {{- else if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
-              path: {{ .Values.basePath }}/health/alive
+              path: /health/alive
               port: http
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
@@ -134,7 +134,7 @@ spec:
           {{- else if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: {{ .Values.basePath }}/health/ready
+              path: /health/ready
               port: http
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
@@ -147,7 +147,7 @@ spec:
           {{- else if .Values.startupProbe.enabled }}
           startupProbe:
             httpGet:
-              path: {{ .Values.basePath }}/health/ready
+              path: /health/ready
               port: http
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
@@ -165,21 +165,21 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.affinity }}
+      {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.deployment.tolerations }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.deployment.topologySpreadConstraints }}
+      {{- end }}
+      {{- with .Values.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.deployment.dnsConfig }}
+      {{- end }}
+      {{- with .Values.deployment.dnsConfig }}
       dnsConfig:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
