@@ -86,6 +86,74 @@ services:
     extraVolumes: []
     extraVolumeMounts: []
 
+  auth-service:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: ghcr.io/healthradar/platform-backend/auth-service
+      tag: "dev"
+      pullPolicy: Always
+    ports:
+      containerPort: 8086
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8086
+    env: []
+    envFrom: []
+    resources: {}
+    probes:
+      path: /health
+      port: http
+      liveness:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+    config:
+      enabled: true
+      mountPath: /config.yaml
+      values:
+        kratos:
+          publicUrl: "http://radar-kratos-public:80"
+          adminUrl: "http://radar-kratos-admin:80/admin"
+        hydra:
+          adminUrl: "http://radar-hydra-admin:4445/admin"
+          publicUrl: "http://radar-hydra-public:4444"
+        tokenHook:
+          apiKey: ""
+        clients:
+          sep:
+            clientId: SEP
+            clientSecret: ""
+            redirectUri: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/study/connect/sep"
+          armt:
+            clientId: aRMT
+            clientSecret: ""
+            redirectUri: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/study/connect/armt"
+          prmt:
+            clientId: pRMT
+            clientSecret: ""
+            redirectUri: "{{ .Values.advertised_protocol }}://{{ .Values.server_name }}/study/connect/prmt"
+        logging:
+          level: "INFO"
+          file: "logs/user-service.log"
+          pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    extraVolumes: []
+    extraVolumeMounts: []
+
   user-service:
     enabled: true
     replicaCount: 1
